@@ -1,0 +1,33 @@
+﻿@model AccountPreRegisteredViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LayoutClean.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+
+            <div class="text-center">
+                <i class="fa-solid fa-list-check fa-fw" style="font-size:5em"></i>
+            </div>
+
+            @if (Model.Culture == "ja")
+            {
+                <div class="py-3">
+                    仮登録いただきありがとうございます。登録完了するためのURLをご指定の <span>@Model.Email</span> に送付いたしました。メールをご確認ください。
+                </div>
+            }
+            else
+            {
+                <div class="py-3">
+                    Thank you, you have been pre-registered.  We have sent link to complete the registration to <span>@Model.Email</span>, please check your email and click on the link to complete your registration.
+                </div>
+            }
+
+        </div>
+
+    </div>
+    <div class="col-md-4"></div>
+</div>

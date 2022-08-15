@@ -1,0 +1,266 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrOrganizationDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/@Model.Culture/usr" class="text-dark text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="/@Model.Culture/settings" class="text-dark text-decoration-none">Settings</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+
+    @if (Model.Organization != null)
+    {
+        <div class="row">
+            <div class="col-md-6 my-2">
+                <h2>
+                    @Model.Organization.Name
+                </h2>
+
+                <h3>Billing</h3>
+                <table class="table">
+                    <tr>
+                        <td>
+                            Name
+                        </td>
+                        <td>
+                            @Model.Organization.BillingName
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Country
+                        </td>
+                        <td>
+                            @Model.Organization.BillingAddressCountry
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Postal Code
+                        </td>
+                        <td>
+                            @Model.Organization.BillingAddressPostalCode
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Region
+                        </td>
+                        <td>
+                            @Model.Organization.BillingAddressRegion
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Locality
+                        </td>
+                        <td>
+                            @Model.Organization.BillingAddressLocality
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Street
+                        </td>
+                        <td>
+                            @Model.Organization.BillingAddressStreet
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Unit
+                        </td>
+                        <td>
+                            @Model.Organization.BillingAddressUnit
+                        </td>
+                    </tr>
+                </table>
+
+                <div>
+                    <button type="button" class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#editBillingModal">
+                        Edit
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 my-2">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h2>
+                            Members
+                        </h2>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#memberModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+
+                @if (Model.Members == null)
+                {
+                    <div class="py-4 text-center">No members.</div>
+                }
+                else
+                {
+                    if (Model.Members.Items != null)
+                    {
+                        <table class="table">
+                            @foreach (var member in Model.Members.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        @member.User?.Name
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    }
+
+                    else
+                    {
+                        <div class="py-4 text-center">No members.</div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Modal Billing Information-->
+        <div class="modal fade" id="editBillingModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edit Organization Billing</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/@Model.Culture/organization/update" method="post">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <lable class="form-label">
+                                    Name
+                                </lable>
+                                <input type="text" name="billingName" value="@Model.Organization.BillingName"
+                                   class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <lable class="form-label">
+                                    Country
+                                </lable>
+                                <input type="text" name="billingAddressCountry" value="@Model.Organization.BillingAddressCountry" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <lable class="form-label">
+                                    Postal Code
+                                </lable>
+                                <input type="text" name="billingAddressPostalCode" value="@Model.Organization.BillingAddressPostalCode" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <lable class="form-label">
+                                    Region
+                                </lable>
+                                <input type="text" name="billingAddressRegion" value="@Model.Organization.BillingAddressRegion" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <lable class="form-label">
+                                    Locality
+                                </lable>
+                                <input type="text" name="billingAddressLocality" value="@Model.Organization.BillingAddressLocality" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <lable class="form-label">
+                                    Street
+                                </lable>
+                                <input type="text" name="billingAddressStreet" value="@Model.Organization.BillingAddressStreet" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <lable class="form-label">
+                                    Unit
+                                </lable>
+                                <input type="text" name="billingAddressUnit" value="@Model.Organization.BillingAddressUnit" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary rounded-0" type="submit">
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Member -->
+        <div class="modal fade" id="memberModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="memberTitleLabel">Add New Member</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            One user can belong to only one organization. If the user is already registered and belong to the other
+                            organization, the user cannnot join your organization. Or the user must leave the organiaztion first then
+                            be invited to join your organization.
+                        </div>
+                        <form action="/@Model.Culture/organization/invite" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" value="@Model.Organization.Id" name="organizationId" />
+                            <div class="mb-3">
+                                <label>Email</label>
+                                <input type="email" class="form-control" name="email" />
+                            </div>
+                            <div class="mb-3">
+                                <label>Name</label>
+                                <input type="text" class="form-control" name="name" />
+                            </div>
+                            <div class="mb-3">
+                                <label>Membership Types</label>
+                                <select class="form-select" name="membershipType">
+                                    <option selected>Open this select menu</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="member">Member</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label>Message</label>
+                                <textarea class="form-control" name="message" rows="5"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <button class="btn btn-primary rounded-0" type="submit">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+    else
+    {
+        <div class="container-fluid">
+            <div class="py-3">You are not in any organzaiotn.  Please create new or be invite by your organization.</div>
+            <form action="/@Model.Culture/organization/create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <lable class="form-label">
+                        Name
+                    </lable>
+                    <input type="text" name="name" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <button class="btn btn-primary rounded-0" type="submit">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    }
+</div>

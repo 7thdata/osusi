@@ -1,0 +1,25 @@
+﻿@model AccountResendConfirmationCodeSentViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_LayoutClean.cshtml";
+}
+
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+
+            <div class="text-center">
+                <i class="fa-solid fa-list-check fa-fw" style="font-size:5em"></i>
+            </div>
+            <div class="py-4">
+                 @Model.Label
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-4"></div>
+</div>
+
+

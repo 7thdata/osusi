@@ -1,0 +1,18 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrTasksBoardViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/@Model.Culture/usr" class="text-dark text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="/@Model.Culture/project/@Model.Project.Id" class="text-dark text-decoration-none">@Model.Project.Name</a></li>
+                <li class="breadcrumb-item"><a href="/@Model.Culture/tasks" class="text-dark text-decoration-none">Tasks</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+</div>

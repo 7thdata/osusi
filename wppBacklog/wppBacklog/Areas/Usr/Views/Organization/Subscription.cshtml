@@ -1,0 +1,38 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrHomeSettingsViewModel
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3">
+
+        <div class="card" style="width: 18rem;">
+            <div class="card-header">
+                Me
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action">My Profile</a>
+                <a href="#" class="list-group-item list-group-item-action">Change Email Address</a>
+                <a href="#" class="list-group-item list-group-item-action">Change Phone Number</a>
+                <a href="#" class="list-group-item list-group-item-action">Change Password</a>
+            </div>
+
+        </div>
+
+    </div>
+    <div class="col-md-3">
+        <div class="card" style="width: 18rem;">
+            <div class="card-header">
+                My Org.
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action">My Org.</a>
+                <a href="#" class="list-group-item list-group-item-action">Subscription</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3"></div>
+    <div class="col-md-3"></div>
+</div>

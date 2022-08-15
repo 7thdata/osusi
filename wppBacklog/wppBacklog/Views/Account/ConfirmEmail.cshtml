@@ -1,0 +1,35 @@
+﻿@model AccountConfirmEmailViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_LayoutClean.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+
+            <div class="text-center">
+                 <i class="fa-solid fa-list-check fa-fw" style="font-size:5em"></i>
+            </div>
+
+            @if (Model.Culture == "ja")
+            {
+                <div class="py-3">
+                    メールアドレスの確認ができました。<a href="/@Model.Culture/account/login">コチラ</a>のより店舗用レシートローラーにログインしてください。
+                </div>
+            }
+            else
+            {
+                <div class="py-3">
+                   Your email is confirmed. Please login from <a href="/@Model.Culture/account/login">here</a>.
+                </div>
+            }
+
+        </div>
+
+    </div>
+    <div class="col-md-4"></div>
+</div>
+
+

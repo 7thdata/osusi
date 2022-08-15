@@ -1,0 +1,63 @@
+﻿@model AccountLoginViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_LayoutClean.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+
+            <div class="text-center">
+                <i class="fa-solid fa-list-check fa-fw" style="font-size:5em"></i>
+            </div>
+
+            <form class="py-5" method="post" action="">
+                @Html.AntiForgeryToken()
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" required id="floatingEmail" name="email" placeholder="@Model.Email">
+                    <label for="floatingEmail">@Model.Email</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" name="password" required id="floatingPassword" placeholder="@Model.Password">
+                    <label for="floatingPassword">@Model.Password</label>
+                </div>
+                <div class="mb-3 mt-3">
+                    <button class="btn btn-secondary btn-top btn-lg border-0 rounded-0 w-100">
+                        @Model.Login
+                    </button>
+                </div>
+            </form>
+
+            @if (Model.Culture == "ja")
+            {
+                <div class="py-2">
+                    パスワードを忘れてしまった方は<a href="/@Model.Culture/account/forgotpassword">コチラ</a>からパスワードをリセットしてください。
+                </div>
+                <div class="py-2">
+                    確認メールが届かなかった方は<a href="/@Model.Culture/account/register">コチラ</a>から再度メールアドレスを入力して再送リクエストをしてください。。
+                </div>
+                <div class="py-2">
+                    アカウントを持っていないかたは<a href="/@Model.Culture/account/register">コチラ</a>から新規登録を行ってください。
+                </div>
+            }
+            else
+            {
+                <div class="py-2">
+                    If you have forgotten your password, please reset your password from <a href="/@Model.Culture/account/forgotpassword">here</a>.
+                </div>
+                <div class="py-2">
+                    If you did not receive an email confirmation from us, please request to resend the conformation email <a href="/@Model.Culture/account/resendConfirmationCode">here</a>.
+                </div>
+                <div class="py-2">
+                    If you are not yet registered, please register from <a href="/@Model.Culture/account/register">here</a>.
+                </div>
+            }
+
+        </div>
+
+    </div>
+    <div class="col-md-4"></div>
+</div>

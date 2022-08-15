@@ -1,0 +1,122 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrTaskIndexViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/@Model.Culture/usr" class="text-dark text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="/@Model.Culture/project/@Model.Project.Id" class="text-dark text-decoration-none">@Model.Project.Name</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <div>
+            <form method="get">
+                <div class="input-group">
+                    <input type="text" name="keyword" class="form-control" />
+                    <button class="btn btn-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        <div>
+            <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newTaskModal">Create New Task</button>
+        </div>
+    </div>
+
+    <div>
+        @if (Model.Tasks.Items != null)
+        {
+            @foreach (var task in Model.Tasks.Items)
+            {
+                <div class="card card-body my-2">
+                    <div>
+                        <a href="/@Model.Culture/project/@Model.Project.Id/task/@task.TaskNum">
+                            @task.Name
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Button trigger modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="newTaskModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/@Model.Culture/project/create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Type
+                            </lable>
+                            <input type="text" name="name" value="" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Name
+                            </lable>
+                            <input type="text" name="name" value="" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Description
+                            </lable>
+                            <textarea class="form-control" name="description"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                Status
+                            </div>
+                            <div class="col-md-6">
+                                Assign
+                            </div>
+                            <div class="col-md-6">
+                                Priority
+                            </div>
+                            <div class="col-md-6">
+                                Milestone
+                            </div>
+                            <div class="col-md-6">
+                                Category
+                            </div>
+                            <div class="col-md-6">
+                                Version
+                            </div>
+                            <div class="col-md-6">
+                                Start
+                            </div>
+                            <div class="col-md-6">
+                                Due
+                            </div>
+                            <div class="col-md-6">
+                                Plan Time
+                            </div>
+                            <div class="col-md-6">
+                                Actual Time
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button class="btn btn-primary rounded-0" type="submit">
+                                Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
