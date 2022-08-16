@@ -111,7 +111,7 @@ namespace wppBacklog.Areas.Usr.Controllers
 
             await _userManager.UpdateAsync(currentUser);
 
-            return RedirectToAction("Details", new { @culture = culture });
+            return RedirectToAction("Details", new { @culture = culture, @rcode = 200 });
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Update organization
-            return RedirectToAction("Details", new { @culture = culture });
+            return RedirectToAction("Details", new { @culture = culture, @rcode = 201 });
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace wppBacklog.Areas.Usr.Controllers
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/organization/invite")]
+        [Route("/{culture}/organization/member/invite")]
         public async Task<IActionResult> Invite(string culture, string name, string email, string membershipType, string memo)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -225,7 +225,7 @@ namespace wppBacklog.Areas.Usr.Controllers
 
                     var callbackUrl = _config.Value.RootDomain + "/" + culture + "/account/confirmEmail?userId=" + user.Id + "&code=" + code;
 
-                    var content = Helpers.MailHelpers.Invited(culture, organization.Name, name, password, callbackUrl);
+                    var content = Helpers.MailHelpers.Invited(culture, organization.Name, name, password, callbackUrl, memo);
 
                     string title;
 
@@ -332,10 +332,50 @@ namespace wppBacklog.Areas.Usr.Controllers
                     $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
             }
         }
-        public IActionResult RemoveMember(string culture, string id)
+
+        /// <summary>
+        /// Remove user.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/member/remove")]
+        public async Task<IActionResult> RemoveMember(string culture, string id)
         {
-            // Remove member
-            return View();
+            // Remove member from org.
+
+            // You?
+            var currentUser = await _userManager.GetUserAsync(User);
+            var membership = (_organizationService.GetMembershipInformationByUserId(currentUser.Id)).FirstOrDefault();
+
+            // Make sure you have membership
+            if (membership == null)
+            {
+                return BadRequest();
+            }
+
+            // You have to be admin.
+            if (membership.MembershipType != "admin")
+            {
+                return BadRequest();
+            }
+
+            var targetUser = await _userManager.FindByIdAsync(id);
+
+            // Make sure the target user is in your org.
+            if (currentUser.OrganizationId != targetUser.OrganizationId)
+            {
+                return BadRequest();
+            }
+
+            targetUser.OrganizationId = "";
+
+            await _userManager.UpdateAsync(targetUser);
+
+            // We shoul let user know?  
+
+            return RedirectToAction("Details", new { @culture = culture, @rcode = 240 });
         }
 
         public IActionResult Subscription(string culture, string id)
@@ -348,6 +388,12 @@ namespace wppBacklog.Areas.Usr.Controllers
             // Show subscription history
             return View();
         }
+
+        /// <summary>
+        /// Leave from the organization.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/leave")]
         public async Task<IActionResult> Leave(string culture)

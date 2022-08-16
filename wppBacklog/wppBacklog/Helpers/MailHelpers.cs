@@ -24,13 +24,16 @@
             return content;
         }
 
-        public static string Invited(string culture, string orgName, string name, string password, string url)
+        public static string Invited(string culture, string orgName, string name, string password, string url, string memo)
         {
             var content = "";
 
             if (culture == "ja")
             {
-                content += name + "様、<br/><br/>店舗用（" + orgName + "）レシートローラーへのご招待です。<br/><br/>";
+                content += name + "様、<br/><br/>店舗用（" + orgName + "）OSUSHI.APPへのご招待です。<br/><br/>";
+                content += "--------------<br/>";
+                content += memo + "<br/>";
+                content += "--------------<br/><br/>";
                 content += "下記のリンクをクリックしメールアドレス確認及び本登録とさせていただきます。<br/>";
                 content += "<a href='" + url + "'>" + url + "</a><br/><br/>";
                 content += "初期パスワードは下記の通りです、ログインした後にパスワードをご変更ください。<br/>";
@@ -40,7 +43,10 @@
                 return content;
             }
 
-            content += "Hello " + name + ", <br/><br/>You have invited to join (" + orgName + ") BACKLOG BY SEVENTH<br/><br/>";
+            content += "Hello " + name + ", <br/><br/>You have invited to join (" + orgName + ") OSUSHI.APP<br/><br/>";
+            content += "--------------<br/>";
+            content += memo + "<br/>";
+            content += "--------------<br/><br/>";
             content += "Please click on link below to confirm your registration.<br/>";
             content += "<a href='" + url + "'>" + url + "</a><br/>";
             content += "Your password is at below, please change to your own password once you login.<br/>";

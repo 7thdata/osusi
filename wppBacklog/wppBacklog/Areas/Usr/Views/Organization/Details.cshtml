@@ -15,7 +15,55 @@
             </ol>
         </nav>
     </div>
-
+    @if (Model.RCode == 200)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            You have created new organization.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 200)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            Organization information has been updated.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 210)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            You have invited new user.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 510 || Model.RCode == 511)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            Error in inviting new user.  Make sure the user is not part of another organization first.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 230)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            You have left the organization.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 540 || Model.RCode == 530)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            Error in leaving the organization.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 240)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            You have removed the member from the organization.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     @if (Model.Organization != null)
     {
         <div class="row">
@@ -209,7 +257,7 @@
                             organization, the user cannnot join your organization. Or the user must leave the organiaztion first then
                             be invited to join your organization.
                         </div>
-                        <form action="/@Model.Culture/organization/invite" method="post">
+                        <form action="/@Model.Culture/organization/member/invite" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" value="@Model.Organization.Id" name="organizationId" />
                             <div class="mb-3">
