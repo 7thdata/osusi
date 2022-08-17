@@ -9,70 +9,109 @@
     <div class="bg-light-color rounded p-2 mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="/@Model.Culture/usr" class="text-dark text-decoration-none">Home</a></li>
-                <li class="breadcrumb-item"><a href="/@Model.Culture/settings" class="text-dark text-decoration-none">Settings</a></li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/usr" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-house-chimney fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/settings" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-gear fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/organizations" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-building fa-fw"></i>
+                    </a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
             </ol>
         </nav>
     </div>
+
     @if (Model.RCode == 200)
     {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            You have created new organization.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (Model.RCode == 200)
-    {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show bg-transparent" role="alert">
             Organization information has been updated.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (Model.RCode == 210)
     {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show bg-transparent" role="alert">
             You have invited new user.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (Model.RCode == 510 || Model.RCode == 511)
     {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show bg-transparent" role="alert">
             Error in inviting new user.  Make sure the user is not part of another organization first.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (Model.RCode == 230)
-    {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            You have left the organization.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (Model.RCode == 540 || Model.RCode == 530)
     {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show bg-transparent" role="alert">
             Error in leaving the organization.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (Model.RCode == 240)
     {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="alert alert-warning alert-dismissible fade show bg-transparent" role="alert">
             You have removed the member from the organization.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
-    @if (Model.Organization != null)
+    @if (Model.RCode == 260)
     {
-        <div class="row">
-            <div class="col-md-6 my-2">
-                <h2>
-                    @Model.Organization.Name
-                </h2>
+        <div class="alert alert-warning alert-dismissible fade show bg-transparent" role="alert">
+            You have set this organization as an active organizaion.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <div class="d-flex justify-content-between">
+        <div class="font-xl">
 
-                <h3>Billing</h3>
+            @Model.Organization.Name
+
+        </div>
+        <div>
+            @if (!Model.IsActiveOrganization)
+            {
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/active" method="post">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-success rounded-0" type="submit">
+                        <i class="fa-light fa-lightbulb-on fa-fw"></i>
+                    </button>
+                </form>
+            }
+            else
+            {
+                <button class="btn btn-success rounded-0" type="button">
+                    <i class="fa-light fa-lightbulb fa-fw"></i>
+                </button>
+            }
+
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6 my-2">
+
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Billing
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#editBillingModal">
+                            <i class="fa-light fa-file-pen fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+                <hr />
                 <table class="table">
                     <tr>
                         <td>
@@ -131,25 +170,19 @@
                         </td>
                     </tr>
                 </table>
-
-                <div>
-                    <button type="button" class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#editBillingModal">
-                        Edit
-                    </button>
-                </div>
             </div>
-            <div class="col-md-6 my-2">
+        </div>
+        <div class="col-md-6 my-2">
+            <div class="card card-body bg-transparent my-2">
                 <div class="d-flex justify-content-between">
-                    <div>
-                        <h2>
-                            Members
-                        </h2>
+                    <div class="font-lg">
+                        Members
                     </div>
                     <div>
-                        <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#memberModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                        <button class="btn btn-secondary btn-sm rounded-0" data-bs-toggle="modal" data-bs-target="#memberModal"><i class="fa-solid fa-plus fa-fw"></i></button>
                     </div>
                 </div>
-
+                <hr />
                 @if (Model.Members == null)
                 {
                     <div class="py-4 text-center">No members.</div>
@@ -177,138 +210,114 @@
                 }
             </div>
         </div>
+    </div>
 
-        <!-- Modal Billing Information-->
-        <div class="modal fade" id="editBillingModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edit Organization Billing</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form action="/@Model.Culture/organization/update" method="post">
-                            @Html.AntiForgeryToken()
-                            <div class="mb-3">
-                                <lable class="form-label">
-                                    Name
-                                </lable>
-                                <input type="text" name="billingName" value="@Model.Organization.BillingName"
+    <!-- Modal Billing Information-->
+    <div class="modal fade" id="editBillingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Organization Billing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/@Model.Culture/organization/update" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Name
+                            </lable>
+                            <input type="text" name="billingName" value="@Model.Organization.BillingName"
                                    class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <lable class="form-label">
-                                    Country
-                                </lable>
-                                <input type="text" name="billingAddressCountry" value="@Model.Organization.BillingAddressCountry" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <lable class="form-label">
-                                    Postal Code
-                                </lable>
-                                <input type="text" name="billingAddressPostalCode" value="@Model.Organization.BillingAddressPostalCode" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <lable class="form-label">
-                                    Region
-                                </lable>
-                                <input type="text" name="billingAddressRegion" value="@Model.Organization.BillingAddressRegion" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <lable class="form-label">
-                                    Locality
-                                </lable>
-                                <input type="text" name="billingAddressLocality" value="@Model.Organization.BillingAddressLocality" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <lable class="form-label">
-                                    Street
-                                </lable>
-                                <input type="text" name="billingAddressStreet" value="@Model.Organization.BillingAddressStreet" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <lable class="form-label">
-                                    Unit
-                                </lable>
-                                <input type="text" name="billingAddressUnit" value="@Model.Organization.BillingAddressUnit" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <button class="btn btn-primary rounded-0" type="submit">
-                                    Save
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Member -->
-        <div class="modal fade" id="memberModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="memberTitleLabel">Add New Member</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            One user can belong to only one organization. If the user is already registered and belong to the other
-                            organization, the user cannnot join your organization. Or the user must leave the organiaztion first then
-                            be invited to join your organization.
                         </div>
-                        <form action="/@Model.Culture/organization/member/invite" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" value="@Model.Organization.Id" name="organizationId" />
-                            <div class="mb-3">
-                                <label>Email</label>
-                                <input type="email" class="form-control" name="email" />
-                            </div>
-                            <div class="mb-3">
-                                <label>Name</label>
-                                <input type="text" class="form-control" name="name" />
-                            </div>
-                            <div class="mb-3">
-                                <label>Membership Types</label>
-                                <select class="form-select" name="membershipType">
-                                    <option selected>Open this select menu</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="member">Member</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label>Message</label>
-                                <textarea class="form-control" name="message" rows="5"></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <button class="btn btn-primary rounded-0" type="submit">Save</button>
-                            </div>
-                        </form>
-                    </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Country
+                            </lable>
+                            <input type="text" name="billingAddressCountry" value="@Model.Organization.BillingAddressCountry" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Postal Code
+                            </lable>
+                            <input type="text" name="billingAddressPostalCode" value="@Model.Organization.BillingAddressPostalCode" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Region
+                            </lable>
+                            <input type="text" name="billingAddressRegion" value="@Model.Organization.BillingAddressRegion" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Locality
+                            </lable>
+                            <input type="text" name="billingAddressLocality" value="@Model.Organization.BillingAddressLocality" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Street
+                            </lable>
+                            <input type="text" name="billingAddressStreet" value="@Model.Organization.BillingAddressStreet" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Unit
+                            </lable>
+                            <input type="text" name="billingAddressUnit" value="@Model.Organization.BillingAddressUnit" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <button class="btn btn-primary rounded-0" type="submit">
+                                <i class="fa-light fa-upload fa-fw"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
 
-    }
-    else
-    {
-        <div class="container-fluid">
-            <div class="py-3">You are not in any organzaiotn.  Please create new or be invite by your organization.</div>
-            <form action="/@Model.Culture/organization/create" method="post">
-                @Html.AntiForgeryToken()
-                <div class="mb-3">
-                    <lable class="form-label">
-                        Name
-                    </lable>
-                    <input type="text" name="name" class="form-control">
+    <!-- Modal Member -->
+    <div class="modal fade" id="memberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="memberTitleLabel">Add New Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                    <button class="btn btn-primary rounded-0" type="submit">
-                        Save
-                    </button>
+                <div class="modal-body">
+                    <form action="/@Model.Culture/organization/member/invite" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" value="@Model.Organization.Id" name="organizationId" />
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" class="form-control" name="email" />
+                        </div>
+                        <div class="mb-3">
+                            <label>Name</label>
+                            <input type="text" class="form-control" name="name" />
+                        </div>
+                        <div class="mb-3">
+                            <label>Membership Types</label>
+                            <select class="form-select" name="membershipType">
+                                <option value="member">Member</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Message</label>
+                            <textarea class="form-control" name="message" rows="5"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <button class="btn btn-primary rounded-0" type="submit">
+                                <i class="fa-light fa-upload fa-fw"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
-    }
+    </div>
+
 </div>

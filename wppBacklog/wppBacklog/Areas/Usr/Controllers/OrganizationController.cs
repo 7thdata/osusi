@@ -45,41 +45,64 @@ namespace wppBacklog.Areas.Usr.Controllers
             return (IUserEmailStore<UserModel>)_userStore;
         }
 
+        [Route("/{culture}/organizations")]
+        public async Task<IActionResult> Index(string culture, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50, int rcode = 0)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            var organizations = _organizationService.GetMyOrganizations(currentUser.Id, keyword, sort, currentPage, itemsPerPage);
+
+            var view = new UsrOrganizationIndexViewModel(organizations)
+            {
+                Culture = culture
+            };
+
+            return View(view);
+        }
+
         /// <summary>
         /// Details of the organzation.
         /// </summary>
         /// <param name="culture"></param>
         /// <returns></returns>
-        [Route("/{culture}/organization")]
-        public async Task<IActionResult> Details(string culture, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50, int rcode = 0)
+        [Route("/{culture}/organization/{id}")]
+        public async Task<IActionResult> Details(string culture, string id, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50, int rcode = 0)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            if (string.IsNullOrEmpty(currentUser.OrganizationId))
-            {
-                // If you don't have any organization, then create one.
-                var nView = new UsrOrganizationDetailsViewModel()
-                {
-                    Organization = null,
-                    Title = "Create New Organization",
-                    Culture = culture,
-                    RCode = rcode
-                };
+            var isActiveOrganization = false;
 
-                // Show your organization here.
-                return View(nView);
+            if (currentUser.OrganizationId == id)
+            {
+                isActiveOrganization = true;
             }
 
-            // Get my organization.
-            var organization = _organizationService.GetOrganization(currentUser.OrganizationId);
-            var members = _organizationService.GetMembershipInformationByOrganizationIdView(currentUser.OrganizationId, keyword, sort, currentPage, itemsPerPage);
+            // Get org.
+            var organization = _organizationService.GetOrganization(id);
 
-            var view = new UsrOrganizationDetailsViewModel()
+            if (organization == null)
             {
-                Organization = organization,
+                return NotFound();
+            }
+
+            // Make sure you belong to the organization
+            var membership = _organizationService.GetMembershipInformationByOrganizationId(id, currentUser.Id, "", 1, 1).Items?.FirstOrDefault();
+
+            if (membership == null)
+            {
+                // You are not member here.
+                return NotFound();
+            }
+
+            var members = _organizationService.GetMembershipInformationByOrganizationIdView(id, keyword, sort, currentPage, itemsPerPage);
+
+            var view = new UsrOrganizationDetailsViewModel(organization)
+            {
                 Title = "Organization",
                 Culture = culture,
-                Members = members
+                Members = members,
+                IsActiveOrganization = isActiveOrganization,
+                RCode = rcode
             };
 
             // Show your organization here.
@@ -106,12 +129,14 @@ namespace wppBacklog.Areas.Usr.Controllers
                 OwnerId = currentUser.Id
             });
 
+            // Add as 
+
             // Update user 
             currentUser.OrganizationId = organizationId;
 
             await _userManager.UpdateAsync(currentUser);
 
-            return RedirectToAction("Details", new { @culture = culture, @rcode = 200 });
+            return RedirectToAction("Details", new { @culture = culture, @id = organizationId, @rcode = 200 });
         }
 
         /// <summary>
@@ -127,71 +152,104 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <param name="billingAddressUnit"></param>
         /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/organization/update")]
-        public async Task<IActionResult> Update(string culture, string billingName,
+        [Route("/{culture}/organization/{id}/update")]
+        public async Task<IActionResult> Update(string culture, string id, string billingName,
             string billingAddressCountry, string billingAddressPostalCode, string billingAddressRegion,
             string billingAddressLocality, string billingAddressStreet, string billingAddressUnit)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
             // Later: You want to make sure you have permision to do this.
-            if (currentUser.OrganizationId != null)
-            {
-                // Get my organization.
-                var organization = _organizationService.GetOrganization(id: currentUser.OrganizationId);
 
-                if (organization == null)
-                {
-                    return BadRequest();
-                }
+            // Get my organization.
+            var organization = _organizationService.GetOrganization(id: id);
 
-                organization.BillingName = billingName;
-                organization.BillingAddressCountry = billingAddressCountry;
-                organization.BillingAddressPostalCode = billingAddressPostalCode;
-                organization.BillingAddressRegion = billingAddressRegion;
-                organization.BillingAddressLocality = billingAddressLocality;
-                organization.BillingAddressStreet = billingAddressStreet;
-                organization.BillingAddressUnit = billingAddressUnit;
-
-                var reuslt = await _organizationService.UpdateOrganizationAsync(organization);
-            }
-
-            // Update organization
-            return RedirectToAction("Details", new { @culture = culture, @rcode = 201 });
-        }
-
-        /// <summary>
-        /// Leave organization, just set organization id to blank.
-        /// </summary>
-        /// <param name="culture"></param>
-        /// <returns></returns>
-        public async Task<IActionResult> LeaveOrganization(string culture)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            // Leave organization
-            currentUser.OrganizationId = "";
-
-            await _userManager.UpdateAsync(currentUser);
-
-            return View("Details", new { @culture = culture });
-        }
-
-        [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/organization/member/invite")]
-        public async Task<IActionResult> Invite(string culture, string name, string email, string membershipType, string memo)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            // Add member
-
-            if (string.IsNullOrEmpty(currentUser.OrganizationId))
+            if (organization == null)
             {
                 return BadRequest();
             }
 
+            organization.BillingName = billingName;
+            organization.BillingAddressCountry = billingAddressCountry;
+            organization.BillingAddressPostalCode = billingAddressPostalCode;
+            organization.BillingAddressRegion = billingAddressRegion;
+            organization.BillingAddressLocality = billingAddressLocality;
+            organization.BillingAddressStreet = billingAddressStreet;
+            organization.BillingAddressUnit = billingAddressUnit;
+
+            var reuslt = await _organizationService.UpdateOrganizationAsync(organization);
+
+            // Update organization
+            return RedirectToAction("Details", new { @culture = culture, @id = id, @rcode = 201 });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <returns></returns>
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/{organizationId}/leave")]
+        public async Task<IActionResult> LeaveOrganization(string culture, string organizationId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // Get membership
+            var membership = (_organizationService.GetMembershipInformationByOrganizationId(organizationId, currentUser.Id, "", 1, 1)).Items?.FirstOrDefault();
+
+            if (membership == null)
+            {
+                return NotFound();
+            }
+
+            // Leave organization
+            var removeResult = await _organizationService.RemoveMemberFromOrganizationAsync(membership.Id);
+
+            if (removeResult == null)
+            {
+                // Something went wrong here.
+                return BadRequest();
+            }
+
+            if (currentUser.OrganizationId == organizationId)
+            {
+                currentUser.OrganizationId = "";
+                await _userManager.UpdateAsync(currentUser);
+            }
+
+            return View("Index", new { @culture = culture, rcode = 250 });
+        }
+
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/{organizationId}/active")]
+        public async Task<IActionResult> SetAsActiveOrganization(string culture, string organizationId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // Get membership
+            var membership = (_organizationService.GetMembershipInformationByOrganizationId(organizationId, currentUser.Id, "", 1, 1)).Items?.FirstOrDefault();
+
+            if (membership == null)
+            {
+                return NotFound();
+            }
+
+            currentUser.OrganizationId = organizationId;
+
+            await _userManager.UpdateAsync(currentUser);
+
+            return RedirectToAction("Details", new { @culture = culture, @id=organizationId, @rcode = 260 });
+
+        }
+
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/{id}/member/invite")]
+        public async Task<IActionResult> Invite(string culture, string id, string name, string email, string membershipType, string memo)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
             // Org?
-            var organization = _organizationService.GetOrganization(currentUser.OrganizationId);
+            var organization = _organizationService.GetOrganization(id);
 
             if (organization == null)
             {
@@ -231,11 +289,11 @@ namespace wppBacklog.Areas.Usr.Controllers
 
                     if (culture == "ja")
                     {
-                        title = "[BB7] BACKLOG BY SEVENTH（" + organization.Name + "）への参加ご招待";
+                        title = "[OSU] OSUSHI.APP（" + organization.Name + "）への参加ご招待";
                     }
                     else
                     {
-                        title = "[BB7] You have been invited to BACKLOG BY SEVENTH (" + organization.Name + ")";
+                        title = "[OSU] You have been invited to OSUSHI.APP (" + organization.Name + ")";
                     }
 
                     await _notificationHandlers.SendEmailAsync(email, title, content);
@@ -256,10 +314,10 @@ namespace wppBacklog.Areas.Usr.Controllers
                         return BadRequest();
                     }
 
-                    return RedirectToAction("Details", new { @culture = culture, @rcode = 210 });
+                    return RedirectToAction("Details", new { @culture = culture, @id = id, @rcode = 210 });
                 }
 
-                return RedirectToAction("Details", new { @culture = culture, @rcode = 511 });
+                return RedirectToAction("Details", new { @culture = culture, @id = id, @rcode = 511 });
             }
 
             if (string.IsNullOrEmpty(tUser.OrganizationId))
@@ -340,14 +398,16 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/organization/member/remove")]
-        public async Task<IActionResult> RemoveMember(string culture, string id)
+        [Route("/{culture}/organization/{organizatioId}/member/remove")]
+        public async Task<IActionResult> RemoveMember(string culture, string organizationId, string id)
         {
             // Remove member from org.
 
             // You?
             var currentUser = await _userManager.GetUserAsync(User);
-            var membership = (_organizationService.GetMembershipInformationByUserId(currentUser.Id)).FirstOrDefault();
+
+            // Your membership.
+            var membership = (_organizationService.GetMembershipInformationByOrganizationId(organizationId, currentUser.Id, "", 1, 1).Items?.FirstOrDefault());
 
             // Make sure you have membership
             if (membership == null)
@@ -363,15 +423,27 @@ namespace wppBacklog.Areas.Usr.Controllers
 
             var targetUser = await _userManager.FindByIdAsync(id);
 
-            // Make sure the target user is in your org.
-            if (currentUser.OrganizationId != targetUser.OrganizationId)
+            if (targetUser == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            targetUser.OrganizationId = "";
+            // target user membership
+            var tmembership = (_organizationService.GetMembershipInformationByOrganizationId(organizationId, targetUser.Id, "", 1, 1).Items?.FirstOrDefault());
 
-            await _userManager.UpdateAsync(targetUser);
+            if (tmembership == null)
+            {
+                return NotFound();
+            }
+
+            // Remove
+            var removeResult = await _organizationService.RemoveMemberFromOrganizationAsync(tmembership.Id);
+
+            if (removeResult == null)
+            {
+                // Something went wrong here.
+                return BadRequest();
+            }
 
             // We shoul let user know?  
 
@@ -389,31 +461,5 @@ namespace wppBacklog.Areas.Usr.Controllers
             return View();
         }
 
-        /// <summary>
-        /// Leave from the organization.
-        /// </summary>
-        /// <param name="culture"></param>
-        /// <returns></returns>
-        [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/organization/leave")]
-        public async Task<IActionResult> Leave(string culture)
-        {
-            // You?
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            if (!string.IsNullOrEmpty(currentUser.OrganizationId))
-            {
-                var membership = await _organizationService.LeaveOrganizationAsync(currentUser.OrganizationId, currentUser.Id);
-
-                if (membership == null)
-                {
-                    return RedirectToAction("Details", new { @culture = culture, @rcode = 540 });
-                }
-
-                return RedirectToAction("Details", new { @culture = culture, @rcode = 230 });
-            }
-
-            return RedirectToAction("Details", new { @culture = culture, @rcode = 530 });
-        }
     }
 }

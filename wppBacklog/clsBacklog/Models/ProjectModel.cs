@@ -29,6 +29,20 @@ namespace clsBacklog.Models
         public string? Description { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsFavorite { get; set; }
+        public string OwnerId { get; set; }
+    }
+
+    public class ProjectViewModel
+    {
+        public ProjectViewModel(ProjectModel project, OrganizationModel organization)
+        {
+            Project = project;
+            Organization = organization;
+        }
+
+        public ProjectModel Project { get; set; }
+        public OrganizationModel? Organization { get; set; }
+
     }
 
     [Table("ProjectFavorites")]
@@ -79,11 +93,11 @@ namespace clsBacklog.Models
         }
 
         public string Id { get; set; }
-       
+
         public string ProjectId { get; set; }
-       
+
         public UserModel? User { get; set; }
-      
+
         public string MembershipType { get; set; }
         public DateTime Created { get; set; }
     }

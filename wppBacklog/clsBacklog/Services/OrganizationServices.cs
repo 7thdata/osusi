@@ -39,7 +39,16 @@ namespace clsBacklog.Services
             // Timestamp is overwritten here.
             organization.Created = DateTime.Now;
 
+            // Add as admin member.
+            var membershipId = Guid.NewGuid().ToString();
+            _db.OrganizationMembers.Add(new OrganizationMemberModel(membershipId, organization.OwnerId ?? "", organization.Id, "admin")
+            {
+                Created = DateTime.Now,
+                OwnerId = organization.OwnerId
+            });
+
             _db.Organizations.Add(organization);
+
             await _db.SaveChangesAsync();
 
             return organization;
@@ -149,6 +158,85 @@ namespace clsBacklog.Services
             };
 
             return result;
+        }
+
+        /// <summary>
+        /// Get list of organizations by user Id.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        public PaginationModel<OrganizationViewModel> GetMyOrganizations(string userId, string? keyword,
+            string? sort, int currentPage, int itemsPerPage)
+        {
+            // Search for specific organizations
+
+            var organizations = from g in _db.Organizations
+                                join m in _db.OrganizationMembers on g.Id equals m.OrganizationId
+                                where g.IsDeleted == false && m.UserId == userId && m.IsDeleted == false
+                                select new OrganizationViewModel(g, m);
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                // Search logic here.
+                // organizations = organizations.Where(g => g.Organization.Name.Contains(keyword));
+            }
+
+            if (!string.IsNullOrEmpty(sort))
+            {
+                // Sort logic here.
+            }
+            else
+            {
+                // Default sort here.
+                // organizations = organizations.OrderBy(g => g.Organization.Name);
+            }
+
+            // Size
+            int totalItems = organizations.Count();
+            int totalPages = 0;
+
+            if (totalItems > 0)
+            {
+                totalPages = (totalItems / itemsPerPage) + 1;
+            }
+
+            // Skip, and take.
+            organizations = organizations.Skip((currentPage - 1) * itemsPerPage);
+            organizations = organizations.Take(itemsPerPage);
+
+            var result = new PaginationModel<OrganizationViewModel>()
+            {
+                Items = organizations.ToList(),
+                Sort = sort,
+                Keyword = keyword,
+                CurrentPage = currentPage,
+                ItemsPerPage = itemsPerPage,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get my organizaions in list.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public IList<OrganizationViewModel> GetMyOrganizaionsInList(string userId)
+        {
+            // Search for specific organizations
+
+            var organizations = from g in _db.Organizations
+                                join m in _db.OrganizationMembers on g.Id equals m.OrganizationId
+                                where g.IsDeleted == false && m.UserId == userId && m.IsDeleted == false
+                                select new OrganizationViewModel(g, m);
+
+            return organizations.ToList();
         }
 
         /// <summary>
@@ -484,7 +572,7 @@ namespace clsBacklog.Services
             if (user.OrganizationId == organizationId)
             {
                 user.OrganizationId = "";
-                
+
                 _db.Users.Update(user);
 
                 await _db.SaveChangesAsync();

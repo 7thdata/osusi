@@ -28,9 +28,9 @@ namespace clsBacklog.Services
         /// <param name="currentPage"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
-        public PaginationModel<ProjectModel> GetProjects(string organizationId, string keyword, string sort, int currentPage, int itemsPerPage)
+        public PaginationModel<ProjectModel> GetProjects(string keyword, string sort, int currentPage, int itemsPerPage)
         {
-            var projects = from p in _db.Projects where p.IsDeleted == false && p.OwnerId == organizationId select p;
+            var projects = from p in _db.Projects where p.IsDeleted == false select p;
 
             if (!string.IsNullOrEmpty(keyword))
             {
@@ -77,14 +77,90 @@ namespace clsBacklog.Services
         }
 
         /// <summary>
-        /// Get specific project.
+        /// Get project with view for the user.
         /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        public PaginationModel<ProjectViewModel> GetProjectsView(string userId, string keyword, string sort, int currentPage, int itemsPerPage)
+        {
+            // get list of organizations.
+            var listOfOrganizations = (from m in _identity.OrganizationMembers
+                                       join o in _identity.Organizations
+                                       on m.OrganizationId equals o.Id
+                                       where m.UserId == userId && m.IsDeleted == false && o.IsDeleted == false
+                                       select o).AsEnumerable();
+
+            // get list of projects.
+            var listOfProjects = (from p in _db.Projects
+                                  join n in _db.ProjectMembers on p.Id equals n.ProjectId
+                                  where p.IsDeleted == false && n.UserId == userId && n.IsDeleted == false
+                                  select p).AsEnumerable(); ;
+
+            // join project and organizaion
+            var projects = from t in listOfProjects
+                           join f in listOfOrganizations
+                           on t.OwnerId equals f.Id
+                           select new ProjectViewModel(t, f);
+
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                // Search logic here.
+                //
+            }
+
+            if (!string.IsNullOrEmpty(sort))
+            {
+                // Sort logic here.
+            }
+            else
+            {
+                // Default sort here.
+                // 
+            }
+
+            // Size
+            int totalItems = projects.Count();
+            int totalPages = 0;
+
+            if (totalItems > 0)
+            {
+                totalPages = (totalItems / itemsPerPage) + 1;
+            }
+
+            // Skip, and take.
+            projects = projects.Skip((currentPage - 1) * itemsPerPage);
+            projects = projects.Take(itemsPerPage);
+
+            var result = new PaginationModel<ProjectViewModel>()
+            {
+                Items = projects.ToList(),
+                Sort = sort,
+                Keyword = keyword,
+                CurrentPage = currentPage,
+                ItemsPerPage = itemsPerPage,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get project.
+        /// </summary>
+        /// <param name="organizationId"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ProjectModel? GetProject(string id)
+        public ProjectModel? GetProject(string organizationId, string id)
         {
             // Get specific project.
-            var project = (from g in _db.Projects where g.Id == id && g.IsDeleted == false select g).FirstOrDefault();
+            var project = (from g in _db.Projects where g.Id == id && g.IsDeleted == false && g.OwnerId == organizationId select g).FirstOrDefault();
 
             return project;
         }
@@ -94,7 +170,7 @@ namespace clsBacklog.Services
         /// </summary>
         /// <param name="project"></param>
         /// <returns></returns>
-        public async Task<ProjectModel?> CreateProjectAsync(ProjectModel project)
+        public async Task<ProjectModel?> CreateProjectAsync(ProjectModel project, string userId)
         {
             // Create project
 
@@ -110,6 +186,15 @@ namespace clsBacklog.Services
             project.Created = DateTime.Now;
 
             _db.Projects.Add(project);
+
+            // Add as a member.
+            var memberId = Guid.NewGuid().ToString();
+            _db.ProjectMembers.Add(new ProjectMemberModel(memberId, project.Id, userId, "admin")
+            {
+                Created = DateTime.Now,
+                OwnerId = userId
+            });
+
             await _db.SaveChangesAsync();
 
             return project;
@@ -261,19 +346,22 @@ namespace clsBacklog.Services
         /// <param name="currentPage"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
-        public PaginationModel<ProjectMemberViewModel> GetProjectMembersView(string projectId, string userId, string sort, int currentPage, int itemsPerPage)
+        public PaginationModel<ProjectMemberViewModel> GetProjectMembersView(string organizationId, string projectId, string userId, string sort, int currentPage, int itemsPerPage)
         {
             // Get members of the organization.
+            var listOfUsers = (from u in _identity.Users
+                              join m in _identity.OrganizationMembers on u.Id equals m.UserId
+                              where m.OrganizationId == organizationId && u.IsDeleted == false && m.IsDeleted == false
+                              select u).AsEnumerable();
 
-            var memberships = from m in _db.ProjectMembers
-                              where
-                              m.ProjectId == projectId && m.IsDeleted == false
-                              select new ProjectMemberViewModel(m.Id, m.ProjectId,
-                                   (from u in _identity.Users where u.Id == m.UserId && m.IsDeleted == false select u).FirstOrDefault(),
-                                   m.MembershipType)
-                              {
-                                  Created = m.Created
-                              };
+            var listOfMembers = (from f in _db.ProjectMembers
+                                join p in _db.Projects on f.ProjectId equals p.Id
+                                where f.IsDeleted == false && p.IsDeleted == false
+                                select f).AsEnumerable();
+
+            var memberships = from t in listOfMembers
+                              join o in listOfUsers on t.UserId equals o.Id
+                              select new ProjectMemberViewModel(t.Id, t.ProjectId, o, t.MembershipType);
 
 
             if (!string.IsNullOrEmpty(userId))
@@ -288,7 +376,7 @@ namespace clsBacklog.Services
             else
             {
                 // Default sort here.
-                memberships = memberships.OrderBy(m => m.Created);
+                // memberships = memberships.OrderBy(m => m.Created);
             }
 
             // Size

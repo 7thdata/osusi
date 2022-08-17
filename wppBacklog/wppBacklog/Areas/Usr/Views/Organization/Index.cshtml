@@ -1,5 +1,5 @@
 ﻿@using wppBacklog.Areas.Usr.Models
-@model UsrProjectIndexViewModel
+@model UsrOrganizationIndexViewModel
 @{
     ViewData["Title"] = Model.Title;
     Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
@@ -22,6 +22,14 @@
             </ol>
         </nav>
     </div>
+
+    @if (Model.RCode == 230)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            You have left the organization.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <div class="d-flex justify-content-between">
         <div>
             <form method="get">
@@ -32,71 +40,46 @@
             </form>
         </div>
         <div>
-            <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newProjectModal">
+            <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newOrganizationModal">
                 <i class="fa-light fa-plus fa-fw"></i>
             </button>
         </div>
     </div>
 
     <div>
-        @if (Model.Projects.Items != null)
+        @if (Model.Organizations.Items != null)
         {
-            @foreach (var project in Model.Projects.Items)
+            @foreach (var organization in Model.Organizations.Items)
             {
-                if (project.Organization != null)
-                {
-                    <div class="card card-body my-2 bg-transparent">
-                        <div>
-                            <a href="/@Model.Culture/organization/@project.Organization.Id/project/@project.Project.Id" class="text-decoration-none stretched-link text-dark">
-                                @project.Organization.Name / @project.Project.Name
-                            </a>
-                        </div>
+                <div class="card card-body my-2 bg-transparent">
+                    <div>
+                        <a href="/@Model.Culture/organization/@organization.Organization.Id" class="text-decoration-none text-dark stretched-link">
+                            @organization.Organization.Name
+                        </a>
                     </div>
-                }
+                </div>
             }
         }
     </div>
 
     <!-- Button trigger modal -->
     <!-- Modal -->
-    <div class="modal fade" id="newProjectModal" tabindex="-1">
+    <div class="modal fade" id="newOrganizationModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">New Project</h5>
+                    <h5 class="modal-title">New Organization</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="/@Model.Culture/project/create" method="post">
+                    <form action="/@Model.Culture/organization/create" method="post">
                         @Html.AntiForgeryToken()
-                        <div class="mb-3">
-                            <lable class="form-label">
-                                Organization
-                            </lable>
-                            <select name="organizationId" class="form-select" aria-label="Default select example">
-                                <option value="">Select Organization</option>
-                                @foreach (var organization in Model.Organizations)
-                                {
-                                    @if (organization.MemberAs.MembershipType == "admin")
-                                    {
-                                        <option value="@organization.Organization.Id">@organization.Organization.Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
                         <div class="mb-3">
                             <lable class="form-label">
                                 Name
                             </lable>
-                            <input type="text" name="name" value="" class="form-control">
+                            <input type="text" name="name" class="form-control">
                         </div>
-                        <div class="mb-3">
-                            <lable class="form-label">
-                                Description
-                            </lable>
-                            <input type="text" name="description" value="" class="form-control">
-                        </div>
-
                         <div class="mb-3">
                             <button class="btn btn-primary rounded-0" type="submit">
                                 <i class="fa-light fa-upload fa-fw"></i>

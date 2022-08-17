@@ -42,12 +42,31 @@ namespace clsBacklog.Interfaces
             string? sort, int currentPage, int itemsPerPage);
 
         /// <summary>
+        /// Get list of organization by user id.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        PaginationModel<OrganizationViewModel> GetMyOrganizations(string userId, string? keyword,
+            string? sort, int currentPage, int itemsPerPage);
+
+        /// <summary>
+        /// Get my organizaions in list.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        IList<OrganizationViewModel> GetMyOrganizaionsInList(string userId);
+
+        /// <summary>
         /// Delete organizaiton.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         Task<OrganizationModel?> DeleteOrganizationAsync(string id);
-
+        
         /// <summary>
         /// Get memberships of the organization.
         /// </summary>

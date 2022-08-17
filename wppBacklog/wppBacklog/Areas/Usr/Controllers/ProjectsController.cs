@@ -39,14 +39,12 @@ namespace wppBacklog.Areas.Usr.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            if (string.IsNullOrEmpty(currentUser.OrganizationId))
-            {
-                return NotFound();
-            }
+            var projects = _projectServices.GetProjectsView(currentUser.Id, keyword, sort, currentPage, itemsPerPage);
 
-            var projects = _projectServices.GetProjects(currentUser.OrganizationId, keyword, sort, currentPage, itemsPerPage);
+            // 
+            var organizations = _organizationServices.GetMyOrganizaionsInList(currentUser.Id);
 
-            var view = new UsrProjectIndexViewModel(projects)
+            var view = new UsrProjectIndexViewModel(projects, organizations)
             {
                 Culture = culture,
                 Title = "Projects"
@@ -66,15 +64,10 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/project/create")]
-        public async Task<IActionResult> CreateProject(string culture, string name,
+        public async Task<IActionResult> CreateProject(string culture, string organizationId, string name,
             string description, int displayOrder)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-
-            if (currentUser.OrganizationId == null)
-            {
-                return BadRequest();
-            }
 
             var projectId = Guid.NewGuid().ToString();
 
@@ -86,15 +79,16 @@ namespace wppBacklog.Areas.Usr.Controllers
             {
                 permaName = GetPermaName();
 
-                isPermaNameUnique = _projectServices.IsPermaNameUnique(permaName, currentUser.OrganizationId);
+                isPermaNameUnique = _projectServices.IsPermaNameUnique(permaName, organizationId);
             }
 
             var project = await _projectServices.CreateProjectAsync(new ProjectModel(projectId,
-                permaName, name, currentUser.OrganizationId)
+                permaName, name, organizationId)
             {
                 Description = description,
-                DisplayOrder = displayOrder
-            });
+                DisplayOrder = displayOrder,
+                OwnerId = organizationId
+            }, currentUser.Id);
 
             // if project is null then likely an error.
             if (project == null)
@@ -102,8 +96,7 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = project.Id, @rcode = 200 });
-
+            return RedirectToAction("Details", new { @culture = culture, @organizationId = project.OwnerId, @id = project.Id, @rcode = 200 });
         }
 
         /// <summary>
@@ -132,19 +125,21 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <param name="culture"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        [Route("/{culture}/project/{id}")]
-        public async Task<IActionResult> Details(string culture, string id, int rcode = 0, int currentPage = 1, int itemsPerPage = 50)
+        [Route("/{culture}/organization/{organizationId}/project/{id}")]
+        public async Task<IActionResult> Details(string culture, string organizationId, string id, int rcode = 0, int currentPage = 1, int itemsPerPage = 50)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            if (currentUser.OrganizationId == null)
+            var isActiveProject = false;
+
+            if(currentUser.LastProjectId == id)
             {
-                return BadRequest();
+                isActiveProject = true;
             }
 
             // Later: Make sure this is your project.
 
-            var project = _projectServices.GetProject(id);
+            var project = _projectServices.GetProject(organizationId, id);
 
             if (project == null)
             {
@@ -159,10 +154,16 @@ namespace wppBacklog.Areas.Usr.Controllers
             var listOfVersion = _taskServices.GetVersions(project.Id);
 
             // Get members, Later: you should make this into partial view.
-            var projectMembers = _projectServices.GetProjectMembersView(project.Id, "", "", currentPage, itemsPerPage);
-            var organizationMembers = _organizationServices.GetMembershipInformationByOrganizationIdFullListView(currentUser.OrganizationId, "");
+            var projectMembers = _projectServices.GetProjectMembersView(organizationId, project.Id, "", "", currentPage, itemsPerPage);
+            var organizationMembers = _organizationServices.GetMembershipInformationByOrganizationIdFullListView(organizationId, "");
+            var organization = _organizationServices.GetOrganization(organizationId);
 
-            var view = new UsrProjectDetailsViewModel(project)
+            if (organization == null)
+            {
+                return NotFound();
+            }
+
+            var view = new UsrProjectDetailsViewModel(project, organization)
             {
                 Project = project,
                 Culture = culture,
@@ -174,7 +175,8 @@ namespace wppBacklog.Areas.Usr.Controllers
                 ListOfTypes = listOfTypes,
                 ListOfVersions = listOfVersion,
                 ProjectMembers = projectMembers,
-                OrganizationMembers = organizationMembers
+                OrganizationMembers = organizationMembers,
+                IsActiveProject = isActiveProject
             };
 
             return View(view);
@@ -187,22 +189,23 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/project/active")]
-        public async Task<IActionResult> SetActiveProject(string culture, string id)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/active")]
+        public async Task<IActionResult> SetActiveProject(string culture, string organizationId, string projectId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            currentUser.LastProjectId = id;
+            currentUser.LastProjectId = projectId;
+            currentUser.OrganizationId = organizationId;
 
             await _userManager.UpdateAsync(currentUser);
 
-            return RedirectToAction("Details", new { @id = id, @culture = culture, @rcode = 201 });
+            return RedirectToAction("Details", new { @id = projectId, @culture = culture, @organizationId = organizationId, @rcode = 201 });
         }
 
 
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/project/status/upsert")]
-        public async Task<IActionResult> UpsertStatus(string culture, string projectId, string id, string name, string color, int displayOrder)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/status/upsert")]
+        public async Task<IActionResult> UpsertStatus(string culture, string organizationId, string projectId, string id, string name, string color, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -215,7 +218,7 @@ namespace wppBacklog.Areas.Usr.Controllers
                     return BadRequest();
                 }
 
-                return RedirectToAction("Details", new { @culture = culture, @id = createResult.ProjectId, @rcode = 210 });
+                return RedirectToAction("Details", new { @culture = culture, @id = createResult.ProjectId, @organizationId = organizationId, @rcode = 210 });
             }
 
             var updateResult = await _taskServices.UpdateStatusAsync(new TaskStatusModel(projectId,
@@ -233,8 +236,8 @@ namespace wppBacklog.Areas.Usr.Controllers
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/project/status/delete")]
-        public async Task<IActionResult> DeleteStatus(string culture, string projectId, string id)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/status/delete")]
+        public async Task<IActionResult> DeleteStatus(string culture, string organizationId, string projectId, string id)
         {
             var result = await _taskServices.DeleteStatusAsync(id);
 
@@ -243,13 +246,13 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = projectId, @rcode = 230 });
+            return RedirectToAction("Details", new { @culture = culture, @id = projectId, @organizationId = organizationId, @rcode = 230 });
 
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/project/type/upsert")]
-        public async Task<IActionResult> UpsertType(string culture, string projectId, string id, string name, string color, int displayOrder)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/type/upsert")]
+        public async Task<IActionResult> UpsertType(string culture, string organizationId, string projectId, string id, string name, string color, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -264,12 +267,12 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @rcode = 211 });
+            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 211 });
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/project/category/upsert")]
-        public async Task<IActionResult> UpsertCategory(string culture, string projectId, string id, string name, int displayOrder)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/category/upsert")]
+        public async Task<IActionResult> UpsertCategory(string culture, string organizationId, string projectId, string id, string name, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -284,12 +287,12 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @rcode = 212 });
+            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 212 });
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/project/milestone/upsert")]
-        public async Task<IActionResult> UpsertMilestone(string culture, string projectId, string id, string name, int displayOrder)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/milestone/upsert")]
+        public async Task<IActionResult> UpsertMilestone(string culture, string organizationId, string projectId, string id, string name, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -304,12 +307,12 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @rcode = 213 });
+            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 213 });
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
-        [Route("/{culture}/project/version/upsert")]
-        public async Task<IActionResult> UpsertVersion(string culture, string projectId, string id, string name, int displayOrder)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/version/upsert")]
+        public async Task<IActionResult> UpsertVersion(string culture, string organizationId, string projectId, string id, string name, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -324,7 +327,7 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @rcode = 214 });
+            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 214 });
         }
 
     }

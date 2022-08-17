@@ -8,10 +8,12 @@ namespace wppBacklog.Areas.Usr.Models
     }
     public class UsrHomeIndexViewModel : ViewBaseModel
     {
-        public UsrHomeIndexViewModel(ProjectModel project)
+        public UsrHomeIndexViewModel(ProjectModel project, OrganizationModel organization)
         {
             Project = project;
+            Organization = organization;
         }
+        public OrganizationModel Organization { get; set; }
         public ProjectModel Project { get; set; }
 
     }

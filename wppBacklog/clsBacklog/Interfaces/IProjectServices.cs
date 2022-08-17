@@ -17,21 +17,35 @@ namespace clsBacklog.Interfaces
         /// <param name="currentPage"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
-        PaginationModel<ProjectModel> GetProjects(string organizationId, string keyword, string sort, int currentPage, int itemsPerPage);
+        PaginationModel<ProjectModel> GetProjects(string keyword, string sort, int currentPage, int itemsPerPage);
+
+
+        /// <summary>
+        /// Get project view for the user.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        PaginationModel<ProjectViewModel> GetProjectsView(string userId, string keyword, string sort, int currentPage, int itemsPerPage);
 
         /// <summary>
         /// Get project.
         /// </summary>
+        /// <param name="organizationId"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        ProjectModel? GetProject(string id);
+        ProjectModel? GetProject(string organizationId, string id);
 
         /// <summary>
         /// Create project.
         /// </summary>
         /// <param name="project"></param>
+        /// <param name="userId">The user who is creating this project.</param>
         /// <returns></returns>
-        Task<ProjectModel?> CreateProjectAsync(ProjectModel project);
+        Task<ProjectModel?> CreateProjectAsync(ProjectModel project, string userId);
 
         /// <summary>
         /// Check to see if perma name is unique.
@@ -74,7 +88,7 @@ namespace clsBacklog.Interfaces
         /// <param name="currentPage"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
-        PaginationModel<ProjectMemberViewModel> GetProjectMembersView(string projectId, string userId, string sort, int currentPage, int itemsPerPage);
+        PaginationModel<ProjectMemberViewModel> GetProjectMembersView(string organizationId, string projectId, string userId, string sort, int currentPage, int itemsPerPage);
 
         /// <summary>
         /// Add member to the project.

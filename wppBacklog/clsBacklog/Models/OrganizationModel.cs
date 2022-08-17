@@ -39,6 +39,17 @@ namespace clsBacklog.Models
         public DateTime CurrentSubscriptionExpires { get; set; }
     }
 
+    public class OrganizationViewModel
+    {
+        public OrganizationViewModel(OrganizationModel organization, OrganizationMemberModel memberAs)
+        {
+            Organization = organization;
+            MemberAs = memberAs;
+        }
+        public OrganizationModel Organization { get; set; }
+        public OrganizationMemberModel MemberAs { get; set; }
+    }
+
     [Table("OrganizationMembers")]
     public class OrganizationMemberModel : SqlDbBaseModel
     {

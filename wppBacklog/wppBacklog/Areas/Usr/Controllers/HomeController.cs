@@ -12,11 +12,15 @@ namespace wppBacklog.Areas.Usr.Controllers
     {
         private readonly UserManager<UserModel> _userManager;
         private readonly IProjectServices _projectServices;
+        private readonly IOrganizationServices _organizationServices;
+
         public HomeController(UserManager<UserModel> userManager,
-            IProjectServices projectServices)
+            IProjectServices projectServices,
+            IOrganizationServices organizationServices)
         {
             _userManager = userManager;
             _projectServices = projectServices;
+            _organizationServices = organizationServices;
         }
 
         [Route("/{culture}/usr")]
@@ -27,7 +31,14 @@ namespace wppBacklog.Areas.Usr.Controllers
             // Make sure you are ready to be here.
             if (string.IsNullOrEmpty(currentUser.OrganizationId))
             {
-                return RedirectToAction("Details", "Organization", new { @culture = culture });
+                return RedirectToAction("Index", "Organizations", new { @culture = culture });
+            }
+
+            var organization = _organizationServices.GetOrganization(currentUser.OrganizationId);
+
+            if (organization == null)
+            {
+                return NotFound();
             }
 
             if (string.IsNullOrEmpty(currentUser.LastProjectId))
@@ -36,17 +47,17 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId, currentUser.LastProjectId);
 
             if (project == null)
             {
-                // 
-                return NotFound();
+                // Then go see project or create one.
+                return RedirectToAction("Index", "Projects", new { @culture = culture });
             }
 
-            var view = new UsrHomeIndexViewModel(project)
+            var view = new UsrHomeIndexViewModel(project,organization)
             {
-                Title = "Top of " + project.Name,
+                Title = project.Name,
                 Culture = culture
             };
 

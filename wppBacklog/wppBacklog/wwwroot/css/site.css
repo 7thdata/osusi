@@ -23,6 +23,10 @@ h3 {
 }
 
 
+hr{
+    border-top:solid 1px #000;
+}
+
 .font-xl {
     font-size: 1.8em;
 }

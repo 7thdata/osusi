@@ -35,7 +35,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
 
             if (project == null)
             {

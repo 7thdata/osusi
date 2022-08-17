@@ -12,14 +12,17 @@ namespace wppBacklog.Areas.Usr.Controllers
     {
         private readonly UserManager<UserModel> _userManager;
         private readonly ITaskServices _taskServices;
+        private readonly IOrganizationServices _organizationServices;
         private readonly IProjectServices _projectServices;
 
         public TasksController(UserManager<UserModel> userManager,
+            IOrganizationServices organizationServices,
             ITaskServices taskServices, IProjectServices projectServices)
         {
             _userManager = userManager;
             _taskServices = taskServices;
             _projectServices = projectServices;
+            _organizationServices = organizationServices;
         }
 
         [Route("/{culture}/tasks")]
@@ -33,13 +36,20 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return RedirectToAction("Details", "Organization", new { @culture = culture });
             }
 
+            var organization = _organizationServices.GetOrganization(currentUser.OrganizationId);
+
+            if(organization == null)
+            {
+                return NotFound();
+            }
+
             if (string.IsNullOrEmpty(currentUser.LastProjectId))
             {
                 return RedirectToAction("Index", "Projects", new { @culture = culture });
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
 
             if (project == null)
             {
@@ -50,9 +60,10 @@ namespace wppBacklog.Areas.Usr.Controllers
             // Show tasks.
             var tasks = _taskServices.GetTasks(currentUser.LastProjectId, keyword, sort, currentPage, itemsPerPage);
 
-            var view = new UsrTaskIndexViewModel(project, tasks)
+            var view = new UsrTaskIndexViewModel(project, organization, tasks)
             {
-                Title = "Tasks"
+                Title = "Tasks",
+                Culture = culture
             };
 
             return View(view);
@@ -75,7 +86,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
 
             if (project == null)
             {
@@ -109,7 +120,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
 
             if (project == null)
             {
