@@ -9,17 +9,33 @@ namespace wppBacklog.Areas.Usr.Models
 
     public class UsrTaskIndexViewModel : ViewBaseModel
     {
-        public UsrTaskIndexViewModel(ProjectModel project, OrganizationModel organization, PaginationModel<TaskModel> tasks)
+        public UsrTaskIndexViewModel(ProjectModel project, OrganizationModel organization, 
+            PaginationModel<TaskModel> tasks, IList<ProjectMemberViewModel> assignableMembers, 
+            IList<TaskTypeModel> taskTypes, IList<TaskStatusModel> taskStatuses, IList<TaskCategoryModel> taskCategories,
+            IList<TaskMilestoneModel> taskMilestones, IList<TaskVersionModel> taskVersions)
         {
             Tasks = tasks;
             Project = project;
             Organization = organization;
+            AssignableMembers = assignableMembers;
+            TaskTypes = taskTypes;
+            TaskStatuses = taskStatuses;
+            TaskCategories = taskCategories;
+            TaskMilestones = taskMilestones;
+            TaskVersions = taskVersions;
         }
 
         public OrganizationModel Organization { get; set; }
         public ProjectModel Project { get; set; }
         public PaginationModel<TaskModel> Tasks { get; set; }
-    }
+
+        public IList<ProjectMemberViewModel> AssignableMembers { get; set; }
+        public IList<TaskTypeModel> TaskTypes { get; set; }
+        public IList<TaskStatusModel> TaskStatuses { get; set; }
+        public IList<TaskCategoryModel> TaskCategories { get; set; }
+        public IList<TaskMilestoneModel> TaskMilestones { get; set; }
+        public IList<TaskVersionModel> TaskVersions { get; set; }
+     }
 
     public class UsrTasksGuntViewModel : ViewBaseModel
     {

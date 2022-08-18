@@ -64,6 +64,13 @@ namespace clsBacklog.Interfaces
         IList<TaskCategoryModel> GetCategories(string projectId);
 
         /// <summary>
+        /// Get category.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        TaskCategoryModel? GetCategory(string id);
+
+        /// <summary>
         /// Create category.
         /// </summary>
         /// <param name="category"></param>
@@ -90,6 +97,13 @@ namespace clsBacklog.Interfaces
         /// <param name="projectId"></param>
         /// <returns></returns>
         IList<TaskMilestoneModel> GetMilestones(string projectId);
+
+        /// <summary>
+        /// Get milestone.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        TaskMilestoneModel? GetMilestone(string id);
 
         /// <summary>
         /// Create milestone.
@@ -120,6 +134,13 @@ namespace clsBacklog.Interfaces
         IList<TaskVersionModel> GetVersions(string projectId);
 
         /// <summary>
+        /// Get version.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        TaskVersionModel? GetVersion(string id);
+
+        /// <summary>
         /// Create version.
         /// </summary>
         /// <param name="version"></param>
@@ -145,7 +166,14 @@ namespace clsBacklog.Interfaces
         /// </summary>
         /// <param name="projectId"></param>
         /// <returns></returns>
-        IList<TaskStatusModel> GetStatus(string projectId);
+        IList<TaskStatusModel> GetStatuses(string projectId);
+
+        /// <summary>
+        /// Get a status.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        TaskStatusModel? GetStatus(string id);
 
         /// <summary>
         /// Create status.
@@ -174,6 +202,13 @@ namespace clsBacklog.Interfaces
         /// <param name="projectId"></param>
         /// <returns></returns>
         IList<TaskTypeModel> GetTaskTypes(string projectId);
+
+        /// <summary>
+        /// Get task type.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        TaskTypeModel? GetTaskType(string id);
 
         /// <summary>
         /// Create task type.

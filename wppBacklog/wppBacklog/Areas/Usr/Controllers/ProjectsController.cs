@@ -132,7 +132,7 @@ namespace wppBacklog.Areas.Usr.Controllers
 
             var isActiveProject = false;
 
-            if(currentUser.LastProjectId == id)
+            if (currentUser.LastProjectId == id)
             {
                 isActiveProject = true;
             }
@@ -147,7 +147,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Get tatus
-            var listOfStatus = _taskServices.GetStatus(project.Id);
+            var listOfStatus = _taskServices.GetStatuses(project.Id);
             var listOfTypes = _taskServices.GetTaskTypes(project.Id);
             var listOfCategories = _taskServices.GetCategories(project.Id);
             var listOfMilestones = _taskServices.GetMilestones(project.Id);
@@ -202,16 +202,16 @@ namespace wppBacklog.Areas.Usr.Controllers
             return RedirectToAction("Details", new { @id = projectId, @culture = culture, @organizationId = organizationId, @rcode = 201 });
         }
 
-
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/status/upsert")]
-        public async Task<IActionResult> UpsertStatus(string culture, string organizationId, string projectId, string id, string name, string color, int displayOrder)
+        public async Task<IActionResult> UpsertStatus(string culture, string organizationId, string projectId, 
+            string id, string name, string color, string textColor, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
                 var createResult = await _taskServices.CreateStatusAsync(new TaskStatusModel(
-                    projectId, id, name, displayOrder, color));
+                    projectId, id, name, displayOrder, color,textColor));
 
                 if (createResult == null)
                 {
@@ -221,17 +221,26 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return RedirectToAction("Details", new { @culture = culture, @id = createResult.ProjectId, @organizationId = organizationId, @rcode = 210 });
             }
 
-            var updateResult = await _taskServices.UpdateStatusAsync(new TaskStatusModel(projectId,
-                id, name, displayOrder, color)
+            var original = _taskServices.GetStatus(id);
+
+            if (original == null)
             {
-            });
+                return NotFound();
+            }
+
+            original.Name = name;
+            original.Color = color;
+            original.TextColor = textColor;
+            original.DisplayOrder = displayOrder;
+
+            var updateResult = await _taskServices.UpdateStatusAsync(original);
 
             if (updateResult == null)
             {
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @rcode = 220 });
+            return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 220 });
 
         }
 
@@ -252,23 +261,62 @@ namespace wppBacklog.Areas.Usr.Controllers
 
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/type/upsert")]
-        public async Task<IActionResult> UpsertType(string culture, string organizationId, string projectId, string id, string name, string color, int displayOrder)
+        public async Task<IActionResult> UpsertType(string culture, string organizationId, string projectId, string id, 
+            string name, string color, string textColor, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
+
+                var result = await _taskServices.CreateTaskTypeAsync(new TaskTypeModel(
+              projectId, id, name, displayOrder, color, textColor));
+
+
+                if (result == null)
+                {
+                    return BadRequest();
+                }
+                return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 211 });
+
             }
 
-            var result = await _taskServices.CreateTaskTypeAsync(new TaskTypeModel(
-                projectId, id, name, displayOrder, color));
+            var original = _taskServices.GetTaskType(id);
+
+            if (original == null)
+            {
+                return NotFound();
+            }
+
+            original.Name = name;
+            original.TextColor = textColor;
+            original.DisplayOrder = displayOrder;
+            original.Color = color;
+
+            var updateResult = await _taskServices.UpdateTaskTypeAsync(original);
+
+            if (updateResult == null)
+            {
+                return BadRequest();
+            }
+
+            return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 221 });
+        }
+
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/type/delete")]
+        public async Task<IActionResult> DeleteType(string culture, string organizationId, string projectId, string id)
+        {
+            var result = await _taskServices.DeleteTaskTypeAsync(id);
 
             if (result == null)
             {
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 211 });
+            return RedirectToAction("Details", new { @culture = culture, @id = projectId, @organizationId = organizationId, @rcode = 231 });
+
         }
+
 
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/category/upsert")]
@@ -277,17 +325,37 @@ namespace wppBacklog.Areas.Usr.Controllers
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
+
+                var result = await _taskServices.CreateCategoryAsync(new TaskCategoryModel(
+               projectId, id, name, displayOrder));
+
+                if (result == null)
+                {
+                    return BadRequest();
+                }
+
+                return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 212 });
             }
 
-            var result = await _taskServices.CreateCategoryAsync(new TaskCategoryModel(
-                projectId, id, name, displayOrder));
+            var original = _taskServices.GetCategory(id);
 
-            if (result == null)
+            if (original == null)
+            {
+                return NotFound();
+            }
+
+            original.Name = name;
+            original.DisplayOrder = displayOrder;
+
+            var updateResult = await _taskServices.UpdateCategoryAsync(original);
+
+            if (updateResult == null)
             {
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 212 });
+            return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 222 });
+
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
@@ -297,17 +365,38 @@ namespace wppBacklog.Areas.Usr.Controllers
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
+
+                var result = await _taskServices.CreateMilestonesAsync(new TaskMilestoneModel(
+              projectId, id, name, displayOrder));
+
+                if (result == null)
+                {
+                    return BadRequest();
+                }
+
+                return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 213 });
+
             }
 
-            var result = await _taskServices.CreateMilestonesAsync(new TaskMilestoneModel(
-                projectId, id, name, displayOrder));
+            var original = _taskServices.GetMilestone(id);
 
-            if (result == null)
+            if (original == null)
+            {
+                return NotFound();
+            }
+
+            original.Name = name;
+            original.DisplayOrder = displayOrder;
+
+            var updateResult = await _taskServices.UpdateMilestonesAsync(original);
+
+            if (updateResult == null)
             {
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 213 });
+            return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 223 });
+
         }
 
         [HttpPost, AutoValidateAntiforgeryToken]
@@ -317,17 +406,38 @@ namespace wppBacklog.Areas.Usr.Controllers
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
+
+                var result = await _taskServices.CreateVersionAsync(new TaskVersionModel(
+               projectId, id, name, displayOrder));
+
+                if (result == null)
+                {
+                    return BadRequest();
+                }
+
+                return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 214 });
+
             }
 
-            var result = await _taskServices.CreateVersionAsync(new TaskVersionModel(
-                projectId, id, name, displayOrder));
+            var original = _taskServices.GetVersion(id);
 
-            if (result == null)
+            if (original == null)
+            {
+                return NotFound();
+            }
+
+            original.Name = name;
+            original.DisplayOrder = displayOrder;
+
+            var updateResult = await _taskServices.UpdateVersionAsync(original);
+
+            if (updateResult == null)
             {
                 return BadRequest();
             }
 
-            return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 214 });
+            return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 224 });
+
         }
 
     }

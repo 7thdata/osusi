@@ -218,6 +218,18 @@ namespace clsBacklog.Services
         }
 
         /// <summary>
+        /// Get category.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public TaskCategoryModel? GetCategory(string id)
+        {
+            var taskCategory = (from t in _db.TaskCategories where t.Id == id select t).FirstOrDefault();
+
+            return taskCategory;
+        }
+
+        /// <summary>
         /// Create category.
         /// </summary>
         /// <param name="category"></param>
@@ -314,6 +326,19 @@ namespace clsBacklog.Services
                              select c;
             return mileStones.ToList();
         }
+
+        /// <summary>
+        /// Get milestone.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public TaskMilestoneModel? GetMilestone(string id)
+        {
+            var taskMilestone = (from t in _db.TaskMilestones where t.Id == id select t).FirstOrDefault();
+
+            return taskMilestone;
+        }
+
 
         /// <summary>
         /// Create milestone.
@@ -414,6 +439,18 @@ namespace clsBacklog.Services
         }
 
         /// <summary>
+        /// Get version.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public TaskVersionModel? GetVersion(string id)
+        {
+            var taskVersion = (from t in _db.TaskVersions where t.Id == id select t).FirstOrDefault();
+
+            return taskVersion;
+        }
+
+        /// <summary>
         /// Create version.
         /// </summary>
         /// <param name="version"></param>
@@ -497,11 +534,11 @@ namespace clsBacklog.Services
         }
 
         /// <summary>
-        /// Get status.
+        /// Get statuses.
         /// </summary>
         /// <param name="projectId"></param>
         /// <returns></returns>
-        public IList<TaskStatusModel> GetStatus(string projectId)
+        public IList<TaskStatusModel> GetStatuses(string projectId)
         {
             var status = from c in _db.TaskStatus
                          where c.ProjectId == projectId &&
@@ -509,6 +546,18 @@ namespace clsBacklog.Services
                          orderby c.DisplayOrder
                          select c;
             return status.ToList();
+        }
+
+        /// <summary>
+        /// Get status.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public TaskStatusModel? GetStatus(string id)
+        {
+            var taskStatus = (from t in _db.TaskStatus where t.Id == id select t).FirstOrDefault();
+
+            return taskStatus;
         }
 
         /// <summary>
@@ -556,6 +605,7 @@ namespace clsBacklog.Services
 
             original.Name = status.Name;
             original.Color = status.Color;
+            original.TextColor = status.TextColor;
             original.DisplayOrder = status.DisplayOrder;
 
             _db.TaskStatus.Update(original);
@@ -609,6 +659,18 @@ namespace clsBacklog.Services
                         select c;
             return types.ToList();
         }
+        
+        /// <summary>
+        /// Get task type.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public TaskTypeModel? GetTaskType(string id)
+        {
+            var taskType = (from t in _db.TaskTypes where t.Id == id select t).FirstOrDefault();
+
+            return taskType;
+        }
 
         /// <summary>
         /// Create task type.
@@ -656,6 +718,7 @@ namespace clsBacklog.Services
 
             original.Name = taskType.Name;
             original.Color = taskType.Color;
+            original.TextColor = taskType.TextColor;
             original.DisplayOrder = taskType.DisplayOrder;
 
             _db.TaskTypes.Update(original);
@@ -664,7 +727,7 @@ namespace clsBacklog.Services
 
             return original;
         }
-        
+
         /// <summary>
         /// Delete task type.
         /// </summary>

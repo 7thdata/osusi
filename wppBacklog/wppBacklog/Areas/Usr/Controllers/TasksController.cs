@@ -38,7 +38,7 @@ namespace wppBacklog.Areas.Usr.Controllers
 
             var organization = _organizationServices.GetOrganization(currentUser.OrganizationId);
 
-            if(organization == null)
+            if (organization == null)
             {
                 return NotFound();
             }
@@ -49,7 +49,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId, currentUser.LastProjectId);
 
             if (project == null)
             {
@@ -58,9 +58,17 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Show tasks.
-            var tasks = _taskServices.GetTasks(currentUser.LastProjectId, keyword, sort, currentPage, itemsPerPage);
+            var tasks = _taskServices.GetTasks(project.Id, keyword, sort, currentPage, itemsPerPage);
 
-            var view = new UsrTaskIndexViewModel(project, organization, tasks)
+            var assignableMembers = _projectServices.GetProjectMembersViewInList(project.OwnerId, project.Id);
+            var taskCategories = _taskServices.GetCategories(project.Id);
+            var taskStatuses = _taskServices.GetStatuses(project.Id);
+            var taskTypes = _taskServices.GetTaskTypes(project.Id);
+            var taskMilestones = _taskServices.GetMilestones(project.Id);
+            var taskVersions = _taskServices.GetVersions(project.Id);
+
+            var view = new UsrTaskIndexViewModel(project, organization, tasks, assignableMembers, taskTypes,
+                taskStatuses, taskCategories, taskMilestones, taskVersions)
             {
                 Title = "Tasks",
                 Culture = culture
@@ -86,7 +94,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId, currentUser.LastProjectId);
 
             if (project == null)
             {
@@ -120,7 +128,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
+            var project = _projectServices.GetProject(currentUser.OrganizationId, currentUser.LastProjectId);
 
             if (project == null)
             {

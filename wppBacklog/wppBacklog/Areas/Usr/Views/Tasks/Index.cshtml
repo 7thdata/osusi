@@ -34,12 +34,14 @@
             <form method="get">
                 <div class="input-group">
                     <input type="text" name="keyword" class="form-control" />
-                    <button class="btn btn-secondary" type="submit">Search</button>
+                    <button class="btn btn-secondary" type="submit"><i class="fa-light fa-magnifying-glass fa-fw"></i></button>
                 </div>
             </form>
         </div>
         <div>
-            <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newTaskModal">Create New Task</button>
+            <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+                <i class="fa-light fa-plus fa-fw"></i>
+            </button>
         </div>
     </div>
 
@@ -75,7 +77,13 @@
                             <lable class="form-label">
                                 Type
                             </lable>
-                            <input type="text" name="name" value="" class="form-control">
+                            <select class="form-select" name="taskType">
+                                @foreach (var type in Model.TaskTypes)
+                                {
+                                    <option value="@type.Id" style="background-color:@type.Color; color:@type.TextColor">@type.Name</option>
+                                }
+                            </select>
+                         
                         </div>
                         <div class="mb-3">
                             <lable class="form-label">
@@ -87,39 +95,81 @@
                             <lable class="form-label">
                                 Description
                             </lable>
-                            <textarea class="form-control" name="description"></textarea>
+                            <textarea class="form-control" name="description" rows="10"></textarea>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                Status
+                            <div class="col-md-6 my-2">
+                                <label>Status</label>
+                                <select class="form-select" name="taskStatus">
+                                    <option value="">Select status.</option>
+                                    @foreach (var taskStatus in Model.TaskStatuses)
+                                    {
+                                        <option value="@taskStatus.Id" style="background-color:@taskStatus.Color; color:@taskStatus.TextColor">@taskStatus.Name</option>
+                                    }
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                Assign
+                            <div class="col-md-6 my-2">
+                                <label>Assign</label>
+
+                                <select class="form-select" name="assignPersonId">
+                                    <option value="">Select assign person.</option>
+                                    @foreach (var member in Model.AssignableMembers)
+                                    {
+                                        <option value="@member.Id">@member.User?.Name</option>
+                                    }
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                Priority
+                            <div class="col-md-6 my-2">
+                                <label>Priority</label>
+                                <select class="form-select" name="taskPriority">
+                                    <option value="">Select priority.</option>
+                                    <option value="1">High</option>
+                                    <option value="2">Normal</option>
+                                    <option value="3">Low</option>
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                Milestone
+                            <div class="col-md-6 my-2">
+                                <label>Milestone</label>
+                                <select class="form-select" name="taskMilestone">
+                                    <option value="">Select milestone.</option>
+                                    @foreach (var milestone in Model.TaskMilestones)
+                                    {
+                                        <option value="@milestone.Id">@milestone.Name</option>
+                                    }
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                Category
+                            <div class="col-md-6 my-2">
+                                <label>Category</label>
+                                <select class="form-select" name="taskCategory">
+                                    <option value="">Select category.</option>
+                                    @foreach (var category in Model.TaskCategories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                Version
+                            <div class="col-md-6 my-2">
+                                <label>Version</label>
+                                <select class="form-select" name="taskMilestone">
+                                    <option value="">Select version.</option>
+                                    @foreach (var version in Model.TaskVersions)
+                                    {
+                                        <option value="@version.Id">@version.Name</option>
+                                    }
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                Start
+                            <div class="col-md-6 my-2">
+                                <label>Start</label>
+                                <input type="date" class="form-control" name="start" />
                             </div>
-                            <div class="col-md-6">
-                                Due
+                            <div class="col-md-6 my-2">
+                                <label>Due</label>
+                                <input type="date" class="form-control" name="due" />
                             </div>
-                            <div class="col-md-6">
-                                Plan Time
-                            </div>
-                            <div class="col-md-6">
-                                Actual Time
+                            <div class="col-md-6 my-2">
+                                <label>Plan Time</label>
+                                <input type="number" class="form-control" name="planTime" />
                             </div>
                         </div>
 

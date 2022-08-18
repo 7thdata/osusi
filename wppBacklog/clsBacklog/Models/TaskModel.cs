@@ -51,13 +51,14 @@ namespace clsBacklog.Models
     [Table("TaskTypes")]
     public class TaskTypeModel : SqlDbBaseModel
     {
-        public TaskTypeModel(string projectId, string id, string name, int displayOrder, string color)
+        public TaskTypeModel(string projectId, string id, string name, int displayOrder, string color, string textColor)
         {
             ProjectId = projectId;
             Id = id;
             Name = name;
             DisplayOrder = displayOrder;
             Color = color;
+            TextColor = textColor;
         }
         [MaxLength(64), Required]
         public string ProjectId { get; set; }
@@ -65,6 +66,8 @@ namespace clsBacklog.Models
         public string Id { get; set; }
         [Required]
         public string Color { get; set; }
+        [Required]
+        public string TextColor { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -74,13 +77,14 @@ namespace clsBacklog.Models
     [Table("TaskStatus")]
     public class TaskStatusModel : SqlDbBaseModel
     {
-        public TaskStatusModel(string projectId, string id, string name, int displayOrder, string color)
+        public TaskStatusModel(string projectId, string id, string name, int displayOrder, string color, string textColor)
         {
             ProjectId = projectId;
             Id = id;
             Name = name;
             DisplayOrder = displayOrder;
             Color = color;
+            TextColor = textColor;
         }
         [MaxLength(64), Required]
         public string ProjectId { get; set; }
@@ -88,6 +92,8 @@ namespace clsBacklog.Models
         public string Id { get; set; }
         [Required]
         public string Color { get; set; }
+        [Required]
+        public string TextColor { get; set; }
 
         [Required]
         public string Name { get; set; }

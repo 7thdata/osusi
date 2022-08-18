@@ -356,7 +356,7 @@ namespace clsBacklog.Services
 
             var listOfMembers = (from f in _db.ProjectMembers
                                 join p in _db.Projects on f.ProjectId equals p.Id
-                                where f.IsDeleted == false && p.IsDeleted == false
+                                where f.IsDeleted == false && p.IsDeleted == false && p.Id == projectId
                                 select f).AsEnumerable();
 
             var memberships = from t in listOfMembers
@@ -404,6 +404,36 @@ namespace clsBacklog.Services
             };
 
             return result;
+        }
+
+        /// <summary>
+        /// Get members with view in list.
+        /// </summary>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        public IList<ProjectMemberViewModel> GetProjectMembersViewInList(string organizationId, string projectId)
+        {
+            // Get members of the organization.
+            var listOfUsers = (from u in _identity.Users
+                               join m in _identity.OrganizationMembers on u.Id equals m.UserId
+                               where m.OrganizationId == organizationId && u.IsDeleted == false && m.IsDeleted == false
+                               select u).AsEnumerable();
+
+            var listOfMembers = (from f in _db.ProjectMembers
+                                 join p in _db.Projects on f.ProjectId equals p.Id
+                                 where f.IsDeleted == false && p.IsDeleted == false && p.Id == projectId
+                                 select f).AsEnumerable();
+
+            var memberships = from t in listOfMembers
+                              join o in listOfUsers on t.UserId equals o.Id
+                              select new ProjectMemberViewModel(t.Id, t.ProjectId, o, t.MembershipType);
+
+            return memberships.ToList();
         }
 
         /// <summary>
