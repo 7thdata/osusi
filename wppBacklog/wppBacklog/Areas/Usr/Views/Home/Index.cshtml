@@ -2,6 +2,9 @@
 @model UsrHomeIndexViewModel
 @{
     ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.Organization.Id;
+    ViewData["ProjectId"] = Model.Project.Id;
+    ViewData["Culture"] = Model.Culture;
     Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
 }
 

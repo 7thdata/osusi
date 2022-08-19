@@ -2,6 +2,9 @@
 @model UsrTaskIndexViewModel
 @{
     ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.Organization.Id;
+    ViewData["ProjectId"] = Model.Project.Id;
+    ViewData["Culture"] = Model.Culture;
     Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
 }
 <div class="container-fluid ps-3">
@@ -9,13 +12,12 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item">
-
                     <a href="/@Model.Culture/organization/@Model.Organization.Id" class="text-dark text-decoration-none">
                         <i class="fa-light fa-building fa-fw"></i> @Model.Organization.Name
                     </a>
                 </li>
                 <li class="breadcrumb-item">
-                    <i class="fa-light fa-sushi fa-fw"></i> <a href="/@Model.Culture/project/@Model.Project.Id" class="text-dark text-decoration-none">@Model.Project.Name</a>
+                    <i class="fa-light fa-sushi fa-fw"></i> <a href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id" class="text-dark text-decoration-none">@Model.Project.Name</a>
                 </li>
                 <li class="breadcrumb-item">
                     <a href="/@Model.Culture/usr" class="text-dark text-decoration-none">
@@ -45,33 +47,106 @@
         </div>
     </div>
 
-    <div>
+    <div class="table-responsive">
         @if (Model.Tasks.Items != null)
         {
-            @foreach (var task in Model.Tasks.Items)
-            {
-                <div class="card card-body my-2">
-                    <div>
-                        <a href="/@Model.Culture/project/@Model.Project.Id/task/@task.TaskNum">
-                            @task.Name
-                        </a>
-                    </div>
-                </div>
-            }
+            <table class="table">
+                <tr>
+                    <td>
+                        Type
+                    </td>
+                    <td>
+                        Id
+                    </td>
+                    <td>
+                        Name
+                    </td>
+                    <td>
+                        Assined To
+                    </td>
+                    <td>
+                        Status
+                    </td>
+                    <td>
+                        Priority
+                    </td>
+                    <td>
+                        Category
+                    </td>
+                    <td>
+                        Created
+                    </td>
+                    <td>
+                        Modified
+                    </td>
+                    <td>
+                        Start From
+                    </td>
+                    <td>
+                        Due
+                    </td>
+                    <td>
+                        Created By
+                    </td>
+                </tr>
+                @foreach (var task in Model.Tasks.Items)
+                {
+                    <tr>
+                        <td>
+                            @task.TaskType
+                        </td>
+                        <td>
+                            @task.Id
+                        </td>
+                        <td>
+                            <a class="stretched-link" href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@task.Id">
+                                @task.Name
+                            </a>
+                        </td>
+                        <td>
+                            @task.AssignedPerson
+                        </td>
+                        <td>
+                            @task.Status
+                        </td>
+                        <td>
+                            @task.Priority
+                        </td>
+                        <td>
+                            @task.TaskCategory
+                        </td>
+                        <td>
+                            @task.Created
+                        </td>
+                        <td>
+                            @task.Modified
+                        </td>
+                        <td>
+                            @task.StartFrom
+                        </td>
+                        <td>
+                            @task.EndAt
+                        </td>
+                        <td>
+                            @task.CreatedBy
+                        </td>
+                    </tr>
+                }
+            </table>
         }
     </div>
 
     <!-- Button trigger modal -->
     <!-- Modal -->
     <div class="modal fade" id="newTaskModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">New Task</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="/@Model.Culture/project/create" method="post">
+                    <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/upsert" method="post">
                         @Html.AntiForgeryToken()
                         <div class="mb-3">
                             <lable class="form-label">
@@ -80,22 +155,24 @@
                             <select class="form-select" name="taskType">
                                 @foreach (var type in Model.TaskTypes)
                                 {
-                                    <option value="@type.Id" style="background-color:@type.Color; color:@type.TextColor">@type.Name</option>
+                                    <option value="@type.Id">
+                                        @type.Name
+                                    </option>
                                 }
                             </select>
-                         
+
                         </div>
                         <div class="mb-3">
                             <lable class="form-label">
                                 Name
                             </lable>
-                            <input type="text" name="name" value="" class="form-control">
+                            <input type="text" name="taskName" value="" class="form-control">
                         </div>
                         <div class="mb-3">
                             <lable class="form-label">
                                 Description
                             </lable>
-                            <textarea class="form-control" name="description" rows="10"></textarea>
+                            <textarea class="form-control" name="taskDescription" rows="10"></textarea>
                         </div>
 
                         <div class="row">
@@ -105,7 +182,9 @@
                                     <option value="">Select status.</option>
                                     @foreach (var taskStatus in Model.TaskStatuses)
                                     {
-                                        <option value="@taskStatus.Id" style="background-color:@taskStatus.Color; color:@taskStatus.TextColor">@taskStatus.Name</option>
+                                        <option value="@taskStatus.Id">
+                                            @taskStatus.Name
+                                        </option>
                                     }
                                 </select>
                             </div>

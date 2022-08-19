@@ -23,7 +23,7 @@
 
         <!-- Sidebar  -->
         <nav id="sidebar" class="bg-secondary-color">
-            
+
             <button type="button" id="sidebarCollapse" class="btn btn-secondary bg-primary-rr border-0"
                     style="position:relative; top:10px; right:-17px; float:right">
                 <i class="fa-solid fa-arrow-left fa-fw" id="leftArrow"></i>
@@ -39,7 +39,7 @@
             </div>
 
             <script>
-                if(Cookies.get('nav') === "open"){
+                if (Cookies.get('nav') === "open") {
                     $('#sidebar').removeClass('active');
                     $('#sidebar').addClass('active');
                     $("#rightArrow").removeClass("visually-hidden");
@@ -47,7 +47,7 @@
                     $("#leftArrow").addClass("visually-hidden");
                     Cookies.set('nav', 'open', { expires: 30 });
                 }
-                else{
+                else {
                     $('#sidebar').removeClass('active');
                     $("#leftArrow").removeClass("visually-hidden");
                     $("#rightArrow").removeClass("visually-hidden");
@@ -146,37 +146,40 @@
                             Home
                         </a>
                     </li>
+                    @if (ViewData["ProjectId"] != null && ViewData["OrganizationId"] != null)
+                    {
+                        <li class="">
+                            <a href="/en/organization/@ViewData["OrganizationId"]/project/@ViewData["projectId"]/tasks">
+                                <i class="fa-light fa-list-check fa-fw"></i>
+                                Tasks
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="/en/organization/@ViewData["OrganizationId"]/project/@ViewData["projectId"]/board">
+                                <i class="fa-light fa-grid fa-fw"></i>
+                                Board
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="/en/organization/@ViewData["OrganizationId"]/project/@ViewData["projectId"]/gunt">
+                                <i class="fa-light fa-chart-bullet fa-fw"></i>
+                                Gunt
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="/en/organization/@ViewData["OrganizationId"]/project/@ViewData["projectId"]/wiki">
+                                <i class="fa-light fa-file-lines fa-fw"></i>
+                                Wiki
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="/en/organization/@ViewData["OrganizationId"]/project/@ViewData["projectId"]/files">
+                                <i class="fa-light fa-folder-tree fa-fw"></i>
+                                File
+                            </a>
+                        </li>
+                    }
 
-                    <li class="">
-                        <a href="/en/tasks">
-                            <i class="fa-light fa-list-check fa-fw"></i>
-                            Tasks
-                        </a>
-                    </li>
-                    <li class="">
-                        <a href="/en/board">
-                            <i class="fa-light fa-grid fa-fw"></i>
-                            Board
-                        </a>
-                    </li>
-                    <li class="">
-                        <a href="/en/gunt">
-                            <i class="fa-light fa-chart-bullet fa-fw"></i>
-                            Gunt
-                        </a>
-                    </li>
-                    <li class="">
-                        <a href="/en/wiki">
-                            <i class="fa-light fa-file-lines fa-fw"></i>
-                            Wiki
-                        </a>
-                    </li>
-                    <li class="">
-                        <a href="/en/files">
-                            <i class="fa-light fa-folder-tree fa-fw"></i>
-                            File
-                        </a>
-                    </li>
                     <li class="">
                         <a href="/en/settings">
                             <i class="fa-light fa-gear fa-fw"></i>
@@ -194,9 +197,7 @@
 
         </nav>
         <div id="content" class="bg-ligher-color">
-
             @RenderBody()
-
         </div>
     </div>
 
@@ -204,7 +205,6 @@
     <script>
         $(document).ready(function() {
 
-          
             $('#sidebarCollapse').on('click', function() {
                 if ($("#rightArrow").hasClass("visually-hidden")) {
 

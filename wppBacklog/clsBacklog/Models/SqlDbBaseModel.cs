@@ -13,6 +13,7 @@ namespace clsBacklog.Models
         public DateTime Created { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime Deleted { get; set; }
+        public DateTime Modified { get; set; }
         
     }
 }

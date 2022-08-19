@@ -230,5 +230,33 @@ namespace clsBacklog.Interfaces
         /// <param name="id"></param>
         /// <returns></returns>
         Task<TaskTypeModel?> DeleteTaskTypeAsync(string id);
+
+        /// <summary>
+        /// Get task update logs.
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        IList<TaskUpdateModel> GetTaskUpdates(string taskId);
+
+        /// <summary>
+        /// Create task update log.
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
+        Task<TaskUpdateModel?> CreateTaskUpdateAsync(TaskUpdateModel update);
+
+        /// <summary>
+        /// Update task update log.
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
+        Task<TaskUpdateModel?> UpdateTaskUpdateAsync(TaskUpdateModel update);
+
+        /// <summary>
+        /// Delete task update log.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<TaskUpdateModel?> DeleteTaskUpdateAsync(string id);
     }
 }

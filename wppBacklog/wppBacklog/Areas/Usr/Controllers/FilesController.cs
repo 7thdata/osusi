@@ -12,30 +12,21 @@ namespace wppBacklog.Areas.Usr.Controllers
     {
         private readonly UserManager<UserModel> _userManager;
         private readonly IProjectServices _projectServices;
-        public FilesController(UserManager<UserModel> userManager, IProjectServices projectServices)
+        private readonly IOrganizationServices _organizationServices;
+        public FilesController(UserManager<UserModel> userManager, IProjectServices projectServices, IOrganizationServices organizationServices)
         {
             _userManager = userManager;
             _projectServices = projectServices;
+            _organizationServices = organizationServices;
         }
 
-        [Route("/{culture}/files")]
-        public async Task<IActionResult> Index(string culture)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/files")]
+        public async Task<IActionResult> Index(string culture, string organizationId, string projectId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            // Make sure you are ready to be here.
-            if (string.IsNullOrEmpty(currentUser.OrganizationId))
-            {
-                return RedirectToAction("Details", "Organization", new { @culture = culture });
-            }
-
-            if (string.IsNullOrEmpty(currentUser.LastProjectId))
-            {
-                return RedirectToAction("Index", "Projects", new { @culture = culture });
-            }
-
             // Project
-            var project = _projectServices.GetProject(currentUser.OrganizationId,currentUser.LastProjectId);
+            var project = _projectServices.GetProject(organizationId, projectId);
 
             if (project == null)
             {
@@ -43,7 +34,21 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return NotFound();
             }
 
-            var view = new UsrFilesIndexViewModel(project)
+            var organization = _organizationServices.GetOrganization(organizationId);
+
+            if (organization == null)
+            {
+                return NotFound();
+            }
+
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
+            var view = new UsrFilesIndexViewModel(project, organization)
             {
                 Title = "Files",
                 Culture = culture

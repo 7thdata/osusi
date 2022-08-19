@@ -25,37 +25,34 @@ namespace wppBacklog.Areas.Usr.Controllers
             _organizationServices = organizationServices;
         }
 
-        [Route("/{culture}/tasks")]
-        public async Task<IActionResult> Index(string culture, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/tasks")]
+        public async Task<IActionResult> Index(string culture, string organizationId, string projectId, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            // Make sure you are ready to be here.
-            if (string.IsNullOrEmpty(currentUser.OrganizationId))
-            {
-                return RedirectToAction("Details", "Organization", new { @culture = culture });
-            }
-
-            var organization = _organizationServices.GetOrganization(currentUser.OrganizationId);
+            var organization = _organizationServices.GetOrganization(organizationId);
 
             if (organization == null)
             {
                 return NotFound();
             }
 
-            if (string.IsNullOrEmpty(currentUser.LastProjectId))
-            {
-                return RedirectToAction("Index", "Projects", new { @culture = culture });
-            }
-
             // Project
-            var project = _projectServices.GetProject(currentUser.OrganizationId, currentUser.LastProjectId);
+            var project = _projectServices.GetProject(organizationId, projectId);
 
             if (project == null)
             {
                 // 
                 return NotFound();
             }
+
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
 
             // Show tasks.
             var tasks = _taskServices.GetTasks(project.Id, keyword, sort, currentPage, itemsPerPage);
@@ -77,24 +74,29 @@ namespace wppBacklog.Areas.Usr.Controllers
             return View(view);
         }
 
-        [Route("/{culture}/board")]
-        public async Task<IActionResult> Board(string culture)
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/task/upsert")]
+        public async Task<IActionResult> Upsert(string culture, string organizationId, string projectId, string id, string taskType,
+            string taskName, string taskDescription, string taskStatus, string assignPerson,
+            int taskPriority, string taskMilestone, string taskCategory, string taskVersion, DateTime start,
+            DateTime due, int planTime)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            // Make sure you are ready to be here.
-            if (string.IsNullOrEmpty(currentUser.OrganizationId))
+            if (string.IsNullOrEmpty(id))
             {
-                return RedirectToAction("Details", "Organization", new { @culture = culture });
+                id = Guid.NewGuid().ToString();
             }
 
-            if (string.IsNullOrEmpty(currentUser.LastProjectId))
+            var organization = _organizationServices.GetOrganization(organizationId);
+
+            if (organization == null)
             {
-                return RedirectToAction("Index", "Projects", new { @culture = culture });
+                return NotFound();
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.OrganizationId, currentUser.LastProjectId);
+            var project = _projectServices.GetProject(organizationId, projectId);
 
             if (project == null)
             {
@@ -102,7 +104,124 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return NotFound();
             }
 
-            var view = new UsrTasksBoardViewModel(project)
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
+            var task = await _taskServices.CreateTaskAsync(new TaskModel(projectId, id, taskName, taskType,currentUser.Id)
+            {
+                StartFrom = start,
+                EndAt = due,
+                Status = taskStatus,
+                AssignedPerson = assignPerson,
+                Description = taskDescription,
+                ExpectedTime = planTime,
+                OwnerId = organizationId,
+                Priority = taskPriority,
+                TaskApplicableVersion = taskVersion,
+                TaskMilestone = taskMilestone,
+                TaskCategory = taskCategory
+            });
+
+            if (task == null)
+            {
+                return BadRequest();
+            }
+
+            var view = new UsrTaskUpsertViewModel(project, organization, task)
+            {
+                Culture = culture,
+                Title = "Task Added"
+            };
+
+            return View(view);
+        }
+
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/task/{id}")]
+        public async Task<IActionResult> Details(string culture, string organizationId, string projectId, string id, int rcode = 0)
+        {
+
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            var organization = _organizationServices.GetOrganization(organizationId);
+
+            if (organization == null)
+            {
+                return NotFound();
+            }
+
+            // Project
+            var project = _projectServices.GetProject(organizationId, projectId);
+
+            if (project == null)
+            {
+                // 
+                return NotFound();
+            }
+
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
+            // Show tasks.
+            var task = _taskServices.GetTask(projectId, id);
+
+            var assignableMembers = _projectServices.GetProjectMembersViewInList(project.OwnerId, project.Id);
+            var taskCategories = _taskServices.GetCategories(project.Id);
+            var taskStatuses = _taskServices.GetStatuses(project.Id);
+            var taskTypes = _taskServices.GetTaskTypes(project.Id);
+            var taskMilestones = _taskServices.GetMilestones(project.Id);
+            var taskVersions = _taskServices.GetVersions(project.Id);
+
+            var logs = _taskServices.GetTaskUpdates(id);
+
+            var view = new UsrTaskDetailsViewModel(project, organization, task, logs, assignableMembers,
+                taskTypes, taskStatuses, taskCategories, taskMilestones, taskVersions)
+            {
+                Culture = culture,
+                Title = task.Name,
+                RCode = rcode
+            };
+
+            return View(view);
+        }
+
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/board")]
+        public async Task<IActionResult> Board(string culture, string organizationId, string projectId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // Make sure you are ready to be here.
+            var organization = _organizationServices.GetOrganization(organizationId);
+
+            if (organization == null)
+            {
+                return NotFound();
+            }
+
+            // Project
+            var project = _projectServices.GetProject(organizationId, projectId);
+
+            if (project == null)
+            {
+                // 
+                return NotFound();
+            }
+
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
+            var view = new UsrTasksBoardViewModel(project, organization)
             {
                 Title = "Board",
                 Culture = culture
@@ -111,24 +230,21 @@ namespace wppBacklog.Areas.Usr.Controllers
             return View(view);
         }
 
-        [Route("/{culture}/gunt")]
-        public async Task<IActionResult> Gunt(string culture)
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/gunt")]
+        public async Task<IActionResult> Gunt(string culture, string organizationId, string projectId)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
             // Make sure you are ready to be here.
-            if (string.IsNullOrEmpty(currentUser.OrganizationId))
-            {
-                return RedirectToAction("Details", "Organization", new { @culture = culture });
-            }
+            var organization = _organizationServices.GetOrganization(organizationId);
 
-            if (string.IsNullOrEmpty(currentUser.LastProjectId))
+            if (organization == null)
             {
-                return RedirectToAction("Index", "Projects", new { @culture = culture });
+                return NotFound();
             }
 
             // Project
-            var project = _projectServices.GetProject(currentUser.OrganizationId, currentUser.LastProjectId);
+            var project = _projectServices.GetProject(organizationId, projectId);
 
             if (project == null)
             {
@@ -136,7 +252,14 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return NotFound();
             }
 
-            var view = new UsrTasksGuntViewModel(project)
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
+            var view = new UsrTasksGuntViewModel(project, organization)
             {
                 Title = "Gunt Chart",
                 Culture = culture

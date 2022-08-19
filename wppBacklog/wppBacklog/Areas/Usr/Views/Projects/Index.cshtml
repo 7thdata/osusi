@@ -1,7 +1,10 @@
 ﻿@using wppBacklog.Areas.Usr.Models
 @model UsrProjectIndexViewModel
 @{
-    ViewData["Title"] = Model.Title;
+     ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.User?.OrganizationId;
+    ViewData["ProjectId"] = Model.User?.ProjectId;
+    ViewData["Culture"] = Model.Culture;
     Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
 }
 <div class="container-fluid ps-3">

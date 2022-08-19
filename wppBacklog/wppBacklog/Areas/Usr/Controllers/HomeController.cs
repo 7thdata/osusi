@@ -55,6 +55,14 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return RedirectToAction("Index", "Projects", new { @culture = culture });
             }
 
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organization.Id, project.Id, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
+
             var view = new UsrHomeIndexViewModel(project,organization)
             {
                 Title = project.Name,

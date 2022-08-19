@@ -11,13 +11,13 @@ namespace clsBacklog.Models
     [Table("Tasks")]
     public class TaskModel : SqlDbBaseModel
     {
-        public TaskModel(string projectId, string id, string name, int taskNum, string taskType)
+        public TaskModel(string projectId, string id, string name, string taskType, string? createdBy)
         {
             ProjectId = projectId;
             Id = id;
             Name = name;
-            TaskNum = taskNum;
             TaskType = taskType;
+            CreatedBy = createdBy;
         }
 
         [MaxLength(64), Required]
@@ -45,6 +45,7 @@ namespace clsBacklog.Models
         public string? TimeUnit { get; set; }
         public string? Mentions { get; set; }
         public string? Files { get; set; }
+        public string? CreatedBy { get; set; }
 
     }
 

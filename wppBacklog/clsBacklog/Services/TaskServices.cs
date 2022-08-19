@@ -111,11 +111,16 @@ namespace clsBacklog.Services
             // Timestamp is overwritten here.
             task.Created = DateTime.Now;
 
+            // Get and set task num.
+            var taskNum = (from n in _db.Tasks where n.ProjectId == task.ProjectId select n).Count() + 1;
+            task.TaskNum = taskNum;
+
             _db.Tasks.Add(task);
             await _db.SaveChangesAsync();
 
             return task;
         }
+
 
         /// <summary>
         /// Get the biggest task num + 1. Use this number to create new task.
@@ -659,7 +664,7 @@ namespace clsBacklog.Services
                         select c;
             return types.ToList();
         }
-        
+
         /// <summary>
         /// Get task type.
         /// </summary>
@@ -756,6 +761,104 @@ namespace clsBacklog.Services
             // await _db.SaveChangesAsync();
 
             return taskType;
+        }
+
+        /// <summary>
+        /// Get task logs.
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        public IList<TaskUpdateModel> GetTaskUpdates(string taskId)
+        {
+            var logs = from l in _db.TaskUpdates where l.TaskId == taskId && l.IsDeleted == false orderby l.Created select l;
+
+            return logs.ToList();
+        }
+
+        /// <summary>
+        /// Create task log.
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
+        public async Task<TaskUpdateModel?> CreateTaskUpdateAsync(TaskUpdateModel update)
+        {
+            // Make sure there is no duplicate.
+            var original = (from g in _db.TaskUpdates where g.Id == update.Id && g.IsDeleted == false select g).FirstOrDefault();
+
+            if (original != null)
+            {
+                return null;
+            }
+
+            update.Created = DateTime.Now;
+
+            _db.TaskUpdates.Add(update);
+
+            await _db.SaveChangesAsync();
+
+            return update;
+        }
+
+        /// <summary>
+        /// Update task log.
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
+
+        public async Task<TaskUpdateModel?> UpdateTaskUpdateAsync(TaskUpdateModel update)
+        {
+            // Make sure there is data
+            var original = (from g in _db.TaskUpdates where g.Id == update.Id select g).FirstOrDefault();
+
+            if (original == null)
+            {
+                return null;
+            }
+
+            original.ActualTime = update.ActualTime;
+            original.AssinedPerson = update.AssinedPerson;
+            original.Description = update.Description;
+            original.EndAt = update.EndAt;
+            original.ExpectedTime = update.ExpectedTime;
+            original.Files = update.Files;
+            original.Mentions = update.Mentions;
+            original.Milestone = update.Milestone;
+            original.Reason = update.Reason;
+            original.StartFrom = update.StartFrom;
+            original.Status = update.Status;
+            original.UpdateBy = update.UpdateBy;
+            original.Modified = DateTime.Now;
+
+            _db.TaskUpdates.Update(original);
+
+            await _db.SaveChangesAsync();
+
+            return original;
+        }
+
+        /// <summary>
+        /// Delete task log.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<TaskUpdateModel?> DeleteTaskUpdateAsync(string id)
+        {
+            // Make sure there is data
+            var original = (from g in _db.TaskUpdates where g.Id == id select g).FirstOrDefault();
+
+            if (original == null)
+            {
+                return null;
+            }
+
+            original.IsDeleted = true;
+            original.Deleted = DateTime.Now;
+
+            _db.TaskUpdates.Update(original);
+
+            await _db.SaveChangesAsync();
+
+            return original;
         }
     }
 }
