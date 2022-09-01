@@ -56,11 +56,9 @@
                         Type
                     </td>
                     <td>
-                        Id
+                        Id,Name
                     </td>
-                    <td>
-                        Name
-                    </td>
+
                     <td>
                         Assined To
                     </td>
@@ -93,21 +91,30 @@
                 {
                     <tr>
                         <td>
-                            @task.TaskType
+                            <div class="p-1 rounded" style="background-color:@task.TaskType.Color; color:@task.TaskType.TextColor">
+                                @task.TaskType.Name
+                            </div>
                         </td>
                         <td>
-                            @task.Id
+                            <div class="">
+                                <span class="badge text-bg-secondary">
+                                    @task.Project.PermaName<span>-</span>@task.TaskNum
+                                </span>
+                            </div>
+                            <div>
+                                <a class="stretched-link" href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@task.Id">
+                                    @task.Name
+                                </a>
+                            </div>
                         </td>
-                        <td>
-                            <a class="stretched-link" href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@task.Id">
-                                @task.Name
-                            </a>
-                        </td>
+
                         <td>
                             @task.AssignedPerson
                         </td>
                         <td>
-                            @task.Status
+                            <div class="p-1 rounded" style="background-color:@task.TaskStatus.Color; color:@task.TaskStatus.TextColor">
+                                @task.TaskStatus.Name
+                            </div>
                         </td>
                         <td>
                             @task.Priority
@@ -116,16 +123,38 @@
                             @task.TaskCategory
                         </td>
                         <td>
-                            @task.Created
+                            @if (task.Created > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.Created.ToString("yyyy-MM-dd")
+                                </span>
+                            }
                         </td>
                         <td>
-                            @task.Modified
+                            @if (task.Modified > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.Modified.ToString("yyyy-MM-dd")
+                                </span>
+                            }
+
                         </td>
                         <td>
-                            @task.StartFrom
+                            @if (task.StartFrom > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.StartFrom?.ToString("yyyy-MM-dd")
+                                </span>
+                            }
+
                         </td>
                         <td>
-                            @task.EndAt
+                             @if (task.EndAt > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.EndAt?.ToString("yyyy-MM-dd")
+                                </span>
+                            }
                         </td>
                         <td>
                             @task.CreatedBy

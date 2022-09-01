@@ -29,7 +29,7 @@ namespace clsBacklog.Models
         public string? Description { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsFavorite { get; set; }
-        public string OwnerId { get; set; }
+        public new string OwnerId { get; set; }
     }
 
     public class ProjectViewModel

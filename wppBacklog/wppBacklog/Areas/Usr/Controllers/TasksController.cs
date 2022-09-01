@@ -25,6 +25,17 @@ namespace wppBacklog.Areas.Usr.Controllers
             _organizationServices = organizationServices;
         }
 
+        /// <summary>
+        /// List of projects.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/tasks")]
         public async Task<IActionResult> Index(string culture, string organizationId, string projectId, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50)
         {
@@ -55,7 +66,7 @@ namespace wppBacklog.Areas.Usr.Controllers
 
 
             // Show tasks.
-            var tasks = _taskServices.GetTasks(project.Id, keyword, sort, currentPage, itemsPerPage);
+            var tasks = _taskServices.GetTasksWithView(project.Id, keyword, sort, currentPage, itemsPerPage);
 
             var assignableMembers = _projectServices.GetProjectMembersViewInList(project.OwnerId, project.Id);
             var taskCategories = _taskServices.GetCategories(project.Id);
@@ -74,6 +85,26 @@ namespace wppBacklog.Areas.Usr.Controllers
             return View(view);
         }
 
+        /// <summary>
+        /// Upsert project.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="taskType"></param>
+        /// <param name="taskName"></param>
+        /// <param name="taskDescription"></param>
+        /// <param name="taskStatus"></param>
+        /// <param name="assignPerson"></param>
+        /// <param name="taskPriority"></param>
+        /// <param name="taskMilestone"></param>
+        /// <param name="taskCategory"></param>
+        /// <param name="taskVersion"></param>
+        /// <param name="start"></param>
+        /// <param name="due"></param>
+        /// <param name="planTime"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/task/upsert")]
         public async Task<IActionResult> Upsert(string culture, string organizationId, string projectId, string id, string taskType,
@@ -111,7 +142,7 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return NotFound();
             }
 
-            var task = await _taskServices.CreateTaskAsync(new TaskModel(projectId, id, taskName, taskType,currentUser.Id)
+            var task = await _taskServices.CreateTaskAsync(new TaskModel(projectId, id, taskName, taskType, currentUser.Id)
             {
                 StartFrom = start,
                 EndAt = due,
@@ -140,6 +171,15 @@ namespace wppBacklog.Areas.Usr.Controllers
             return View(view);
         }
 
+        /// <summary>
+        /// Detail of the project.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="rcode"></param>
+        /// <returns></returns>
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/task/{id}")]
         public async Task<IActionResult> Details(string culture, string organizationId, string projectId, string id, int rcode = 0)
         {
@@ -170,7 +210,12 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // Show tasks.
-            var task = _taskServices.GetTask(projectId, id);
+            var task = _taskServices.GetTaskWithView(projectId, id);
+
+            if (task == null)
+            {
+                return NotFound();
+            }
 
             var assignableMembers = _projectServices.GetProjectMembersViewInList(project.OwnerId, project.Id);
             var taskCategories = _taskServices.GetCategories(project.Id);
@@ -178,11 +223,12 @@ namespace wppBacklog.Areas.Usr.Controllers
             var taskTypes = _taskServices.GetTaskTypes(project.Id);
             var taskMilestones = _taskServices.GetMilestones(project.Id);
             var taskVersions = _taskServices.GetVersions(project.Id);
+            var taskCompletionReasons = _taskServices.GetTaskCompletionReasons(projectId);
 
             var logs = _taskServices.GetTaskUpdates(id);
 
             var view = new UsrTaskDetailsViewModel(project, organization, task, logs, assignableMembers,
-                taskTypes, taskStatuses, taskCategories, taskMilestones, taskVersions)
+                taskTypes, taskStatuses, taskCategories, taskMilestones, taskVersions, taskCompletionReasons)
             {
                 Culture = culture,
                 Title = task.Name,
@@ -190,6 +236,81 @@ namespace wppBacklog.Areas.Usr.Controllers
             };
 
             return View(view);
+        }
+
+        /// <summary>
+        /// Upsert log.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="taskId"></param>
+        /// <param name="id"></param>
+        /// <param name="comment"></param>
+        /// <param name="assignedPerson"></param>
+        /// <param name="taskStatus"></param>
+        /// <param name="taskMilestone"></param>
+        /// <param name="completeReason"></param>
+        /// <param name="startFrom"></param>
+        /// <param name="endAt"></param>
+        /// <param name="plan"></param>
+        /// <param name="actual"></param>
+        /// <returns></returns>
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/task/{taskId}/log/upsert")]
+        public async Task<IActionResult> UpsertLog(string culture, string organizationId, string projectId,
+            string taskId, string id, string comment, string assignedPerson, string taskStatus,
+            string taskMilestone, string completeReason, DateTime startFrom, DateTime endAt, int plan, int actual)
+        {
+
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (string.IsNullOrEmpty(id))
+            {
+                id = Guid.NewGuid().ToString();
+            }
+
+            var organization = _organizationServices.GetOrganization(organizationId);
+
+            if (organization == null)
+            {
+                return NotFound();
+            }
+
+            // Project
+            var project = _projectServices.GetProject(organizationId, projectId);
+
+            if (project == null)
+            {
+                // 
+                return NotFound();
+            }
+
+            // Make sure you are in this.
+            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
+            if (member.TotalItems == 0)
+            {
+                return NotFound();
+            }
+
+            var log = await _taskServices.CreateTaskUpdateAsync(new TaskUpdateModel(projectId, taskId, id, comment, currentUser.Id)
+            {
+                Status = taskStatus,
+                AssinedPerson = assignedPerson,
+                Milestone = taskMilestone,
+                Reason = completeReason,
+                StartFrom = startFrom,
+                EndAt = endAt,
+                ExpectedTime = plan,
+                ActualTime = actual
+            });
+
+            if (log == null)
+            {
+                return BadRequest();
+            }
+
+            return RedirectToAction("Details", new { @culture = culture, @projectId = projectId, @organizationId = organizationId, @id = taskId, @rcode = 270 });
         }
 
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/board")]

@@ -11,7 +11,7 @@ using clsBacklog.Data;
 
 namespace clsBacklog.Migrations.Application
 {
-    [DbContext(typeof(ApplicationContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20220819010046_modified")]
     partial class modified
     {

@@ -11,12 +11,9 @@ namespace clsBacklog.Services
 {
     public class ProjectServices : IProjectServices
     {
-        private readonly IdentityContext _identity;
-        private readonly ApplicationContext _db;
-        public ProjectServices(IdentityContext identity,
-            ApplicationContext db)
+        private readonly ApplicationDbContext _db;
+        public ProjectServices(ApplicationDbContext db)
         {
-            _identity = identity;
             _db = db;
         }
 
@@ -35,7 +32,7 @@ namespace clsBacklog.Services
             if (!string.IsNullOrEmpty(keyword))
             {
                 // Search logic here.
-                projects = projects.Where(g => g.Id.Contains(keyword) || g.Name.Contains(keyword));
+                projects = projects.Where(g => g.Id.Contains(keyword) || g.Name.Contains(keyword) || g.PermaName.Contains(keyword) );
             }
 
             if (!string.IsNullOrEmpty(sort))
@@ -87,24 +84,14 @@ namespace clsBacklog.Services
         /// <returns></returns>
         public PaginationModel<ProjectViewModel> GetProjectsView(string userId, string keyword, string sort, int currentPage, int itemsPerPage)
         {
-            // get list of organizations.
-            var listOfOrganizations = (from m in _identity.OrganizationMembers
-                                       join o in _identity.Organizations
-                                       on m.OrganizationId equals o.Id
-                                       where m.UserId == userId && m.IsDeleted == false && o.IsDeleted == false
-                                       select o).AsEnumerable();
-
-            // get list of projects.
-            var listOfProjects = (from p in _db.Projects
-                                  join n in _db.ProjectMembers on p.Id equals n.ProjectId
-                                  where p.IsDeleted == false && n.UserId == userId && n.IsDeleted == false
-                                  select p).AsEnumerable(); ;
-
+           
             // join project and organizaion
-            var projects = from t in listOfProjects
-                           join f in listOfOrganizations
-                           on t.OwnerId equals f.Id
-                           select new ProjectViewModel(t, f);
+            var projects = from t in _db.Projects 
+                           join m in _db.ProjectMembers on t.Id equals m.ProjectId
+                           join f in _db.Organizations on t.OwnerId equals f.Id 
+                           join g in _db.OrganizationMembers on f.Id equals g.OrganizationId
+                           where m.IsDeleted == false && g.IsDeleted == false && t.IsDeleted == false && f.IsDeleted == false
+                           select new ProjectViewModel(t,f);
 
 
             if (!string.IsNullOrEmpty(keyword))
@@ -160,7 +147,7 @@ namespace clsBacklog.Services
         public ProjectModel? GetProject(string organizationId, string id)
         {
             // Get specific project.
-            var project = (from g in _db.Projects where g.Id == id && g.IsDeleted == false && g.OwnerId == organizationId select g).FirstOrDefault();
+            var project = (from g in _db.Projects where (g.Id == id || g.PermaName == id) && g.IsDeleted == false && g.OwnerId == organizationId select g).FirstOrDefault();
 
             return project;
         }
@@ -349,18 +336,8 @@ namespace clsBacklog.Services
         public PaginationModel<ProjectMemberViewModel> GetProjectMembersView(string organizationId, string projectId, string userId, string sort, int currentPage, int itemsPerPage)
         {
             // Get members of the organization.
-            var listOfUsers = (from u in _identity.Users
-                              join m in _identity.OrganizationMembers on u.Id equals m.UserId
-                              where m.OrganizationId == organizationId && u.IsDeleted == false && m.IsDeleted == false
-                              select u).AsEnumerable();
-
-            var listOfMembers = (from f in _db.ProjectMembers
-                                join p in _db.Projects on f.ProjectId equals p.Id
-                                where f.IsDeleted == false && p.IsDeleted == false && p.Id == projectId
-                                select f).AsEnumerable();
-
-            var memberships = from t in listOfMembers
-                              join o in listOfUsers on t.UserId equals o.Id
+            var memberships = from t in _db.ProjectMembers
+                              join o in _db.Users on t.UserId equals o.Id
                               select new ProjectMemberViewModel(t.Id, t.ProjectId, o, t.MembershipType);
 
 
@@ -418,19 +395,9 @@ namespace clsBacklog.Services
         /// <returns></returns>
         public IList<ProjectMemberViewModel> GetProjectMembersViewInList(string organizationId, string projectId)
         {
-            // Get members of the organization.
-            var listOfUsers = (from u in _identity.Users
-                               join m in _identity.OrganizationMembers on u.Id equals m.UserId
-                               where m.OrganizationId == organizationId && u.IsDeleted == false && m.IsDeleted == false
-                               select u).AsEnumerable();
-
-            var listOfMembers = (from f in _db.ProjectMembers
-                                 join p in _db.Projects on f.ProjectId equals p.Id
-                                 where f.IsDeleted == false && p.IsDeleted == false && p.Id == projectId
-                                 select f).AsEnumerable();
-
-            var memberships = from t in listOfMembers
-                              join o in listOfUsers on t.UserId equals o.Id
+            // Get project members.
+            var memberships = from t in _db.ProjectMembers
+                              join o in _db.Users on t.UserId equals o.Id
                               select new ProjectMemberViewModel(t.Id, t.ProjectId, o, t.MembershipType);
 
             return memberships.ToList();
@@ -457,7 +424,7 @@ namespace clsBacklog.Services
             }
 
             // I want to make sure userId and organizationId exist and valid.
-            var user = (from u in _identity.Users
+            var user = (from u in _db.Users
                         where u.IsDeleted == false && u.IsSuspended == false &&
                         u.Id == userId
                         select u).FirstOrDefault();

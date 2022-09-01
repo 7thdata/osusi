@@ -91,7 +91,35 @@ namespace wppBacklog.Controllers
                 return RedirectToAction("Index", "Home", new { @area = "Usr", @culture = culture });
             }
 
-            return BadRequest();
+            if (result.IsLockedOut)
+            {
+                // _logger.LogWarning("User account locked out.");
+                return RedirectToPage("./Lockout");
+            }
+
+            var view = new AccountLoginViewModel()
+            {
+                Culture = culture,
+                Email = email,
+                RCode = 500
+            };
+
+            if (culture == "ja")
+            {
+                view.Title = "ログイン";
+                view.Email = "メールアドレス";
+                view.Password = "パスワード";
+                view.Login = "新規登録";
+            }
+            else
+            {
+                view.Title = "Login";
+                view.Email = "Email Address";
+                view.Password = "Password";
+                view.Login = "Login";
+            }
+
+            return View(view);
         }
 
         [HttpGet]

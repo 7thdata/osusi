@@ -146,12 +146,13 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return NotFound();
             }
 
-            // Get tatus
+            // Get lists
             var listOfStatus = _taskServices.GetStatuses(project.Id);
             var listOfTypes = _taskServices.GetTaskTypes(project.Id);
             var listOfCategories = _taskServices.GetCategories(project.Id);
             var listOfMilestones = _taskServices.GetMilestones(project.Id);
             var listOfVersion = _taskServices.GetVersions(project.Id);
+            var listOfCompletionReason = _taskServices.GetTaskCompletionReasons(project.Id);
 
             // Get members, Later: you should make this into partial view.
             var projectMembers = _projectServices.GetProjectMembersView(organizationId, project.Id, "", "", currentPage, itemsPerPage);
@@ -174,6 +175,7 @@ namespace wppBacklog.Areas.Usr.Controllers
                 ListOfStatus = listOfStatus,
                 ListOfTypes = listOfTypes,
                 ListOfVersions = listOfVersion,
+                ListOfTaskCompletionReasons = listOfCompletionReason,
                 ProjectMembers = projectMembers,
                 OrganizationMembers = organizationMembers,
                 IsActiveProject = isActiveProject
@@ -202,16 +204,28 @@ namespace wppBacklog.Areas.Usr.Controllers
             return RedirectToAction("Details", new { @id = projectId, @culture = culture, @organizationId = organizationId, @rcode = 201 });
         }
 
+        /// <summary>
+        /// Upsert status.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="color"></param>
+        /// <param name="textColor"></param>
+        /// <param name="displayOrder"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/status/upsert")]
-        public async Task<IActionResult> UpsertStatus(string culture, string organizationId, string projectId, 
+        public async Task<IActionResult> UpsertStatus(string culture, string organizationId, string projectId,
             string id, string name, string color, string textColor, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
                 var createResult = await _taskServices.CreateStatusAsync(new TaskStatusModel(
-                    projectId, id, name, displayOrder, color,textColor));
+                    projectId, id, name, displayOrder, color, textColor));
 
                 if (createResult == null)
                 {
@@ -244,6 +258,14 @@ namespace wppBacklog.Areas.Usr.Controllers
 
         }
 
+        /// <summary>
+        /// Delete status.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/status/delete")]
         public async Task<IActionResult> DeleteStatus(string culture, string organizationId, string projectId, string id)
@@ -259,9 +281,21 @@ namespace wppBacklog.Areas.Usr.Controllers
 
         }
 
+        /// <summary>
+        /// Upser type.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="color"></param>
+        /// <param name="textColor"></param>
+        /// <param name="displayOrder"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/type/upsert")]
-        public async Task<IActionResult> UpsertType(string culture, string organizationId, string projectId, string id, 
+        public async Task<IActionResult> UpsertType(string culture, string organizationId, string projectId, string id,
             string name, string color, string textColor, int displayOrder)
         {
             if (string.IsNullOrEmpty(id))
@@ -302,6 +336,14 @@ namespace wppBacklog.Areas.Usr.Controllers
             return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 221 });
         }
 
+        /// <summary>
+        /// Delete type.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/type/delete")]
         public async Task<IActionResult> DeleteType(string culture, string organizationId, string projectId, string id)
@@ -317,7 +359,16 @@ namespace wppBacklog.Areas.Usr.Controllers
 
         }
 
-
+        /// <summary>
+        /// Upsert category.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="displayOrder"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/category/upsert")]
         public async Task<IActionResult> UpsertCategory(string culture, string organizationId, string projectId, string id, string name, int displayOrder)
@@ -358,6 +409,16 @@ namespace wppBacklog.Areas.Usr.Controllers
 
         }
 
+        /// <summary>
+        /// Upsert milestone.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="displayOrder"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/milestone/upsert")]
         public async Task<IActionResult> UpsertMilestone(string culture, string organizationId, string projectId, string id, string name, int displayOrder)
@@ -399,6 +460,16 @@ namespace wppBacklog.Areas.Usr.Controllers
 
         }
 
+        /// <summary>
+        /// Upsert version.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="displayOrder"></param>
+        /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/version/upsert")]
         public async Task<IActionResult> UpsertVersion(string culture, string organizationId, string projectId, string id, string name, int displayOrder)
@@ -437,6 +508,57 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 224 });
+
+        }
+
+        /// <summary>
+        /// Upsert completion reason.
+        /// </summary>
+        /// <param name="culture"></param>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="displayOrder"></param>
+        /// <returns></returns>
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/organization/{organizationId}/project/{projectId}/completionReason/upsert")]
+        public async Task<IActionResult> UpsertCompletionReason(string culture, string organizationId, string projectId, string id, string name, int displayOrder)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                id = Guid.NewGuid().ToString();
+
+                var result = await _taskServices.CreateTaskCompletionReasonAsync(new TaskCompletionReasonModel(
+               projectId, id, name, displayOrder));
+
+                if (result == null)
+                {
+                    return BadRequest();
+                }
+
+                return RedirectToAction("Details", new { @culture = culture, @id = result.ProjectId, @organizationId = organizationId, @rcode = 215 });
+
+            }
+
+            var original = _taskServices.GetTaskCompletionReason(id);
+
+            if (original == null)
+            {
+                return NotFound();
+            }
+
+            original.Name = name;
+            original.DisplayOrder = displayOrder;
+
+            var updateResult = await _taskServices.UpdateTaskCompletionReasonAsync(original);
+
+            if (updateResult == null)
+            {
+                return BadRequest();
+            }
+
+            return RedirectToAction("Details", new { @culture = culture, @id = updateResult.ProjectId, @organizationId = organizationId, @rcode = 225 });
 
         }
 

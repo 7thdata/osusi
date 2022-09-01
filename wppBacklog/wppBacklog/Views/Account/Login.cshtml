@@ -13,7 +13,16 @@
                 <i class="fa-light fa-sushi fa-fw" style="font-size:5em"></i>
             </div>
 
+
             <form class="py-5" method="post" action="">
+
+                @if (Model.RCode == 500)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Login fail.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
                 @Html.AntiForgeryToken()
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control" required id="floatingEmail" name="email" placeholder="@Model.Email">

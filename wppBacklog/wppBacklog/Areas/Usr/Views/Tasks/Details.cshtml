@@ -7,8 +7,9 @@
     ViewData["Culture"] = Model.Culture;
     Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
 }
-<div class="container-fluid ps-3">
-    <div class="bg-light-color rounded p-2 mb-3">
+
+<div class="container-fluid">
+    <div class="bg-light-color rounded p-2 mb-3 ps-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item">
@@ -40,10 +41,28 @@
     <div class="mb-3">
         <div class="d-flex justify-content-between">
             <div class="">
-                Type, ID, Url
+                <span>
+                    @Model.Task.TaskType.Name
+                </span>
+                @Model.Task.Project.PermaName - @Model.Task.TaskNum  Url
             </div>
             <div>
-                @Model.Task.StartFrom -  @Model.Task.EndAt, @Model.Task.Status
+                <span>
+                    @Model.Task.TaskStatus.Name
+                </span>
+
+                @if (Model.Task.StartFrom > DateTime.MinValue)
+                {
+                    <span>
+                        @Model.Task.StartFrom
+                    </span>
+                }
+                -
+                @if (Model.Task.EndAt > DateTime.MinValue)
+                {
+                    @Model.Task.EndAt
+                }
+
             </div>
         </div>
         <div class="d-flex justify-content-between">
@@ -57,6 +76,7 @@
         </div>
     </div>
 
+    <!--Jumbotron-->
     <div class="card card-body">
         <div>
             Who Icon, @Model.Task.CreatedBy @Model.Task.Created
@@ -156,26 +176,137 @@
                             @Model.Task.ActualTime
                         </td>
                     </tr>
-                    
+
                 </table>
             </div>
         </div>
     </div>
 
+    @if (Model.TaskLogs != null)
+    {
+        <div class="card card-body mt-3">
+            @foreach (var log in Model.TaskLogs)
+            {
+                <div class="d-flex border-bottom">
+                    <div style="width:50px;">Icon,</div>
+                    <div class="w-100">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                Person Name, @log.Created.ToString("yyyy-MM-dd HH:mm:ss")
+                            </div>
+                            <div>
+                                Actions
+                            </div>
+                        </div>
+                        <div class="p-2">
+                            @log.Description
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 
 </div>
-<div class="container-fluid sticky-bottom p-3 bg-light-color" style="margin-top:20px; margin-left:-20px;">
-    <div class="row ms-2">
-        <div class="col-md-8">
-            <textarea class="form-control" rows="5"></textarea>
-        </div>
-        <div class="col-md-4">
-        </div>
-    </div>
+<div class="container-fluid p-3 bg-light-color mt-3" style="border-top:3px solid #000; margin:0;">
+    <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@Model.Task.Id/log/upsert" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row ms-2">
+            <div class="col-md-8">
+                <label>
+                    Comment
+                </label>
+                <textarea class="form-control" rows="10" name="comment"></textarea>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label>Status</label>
+                    <select class="form-select" name="taskStatus">
+                        <option value="">Select status.</option>
+                        @foreach (var taskStatus in Model.TaskStatuses)
+                        {
+                            <option value="@taskStatus.Id">
+                                @taskStatus.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label>
+                                Assign Person　
+                            </label>
+                            <select class="form-select" name="assignPerson">
+                                <option value="">Select assign person.</option>
+                                @foreach (var member in Model.AssignableMembers)
+                                {
+                                    <option value="@member.Id">@member.User?.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>
+                                Milestone
+                            </label>
+                            <select class="form-select" name="taskMilestone">
+                                <option value="">Select milestone.</option>
+                                @foreach (var milestone in Model.TaskMilestones)
+                                {
+                                    <option value="@milestone.Id">@milestone.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>
+                                Complete Reason
+                            </label>
+                            <select class="form-select" name="taskCompleteReason">
+                                <option value="">Select completion reason.</option>
+                                @foreach (var taskCompletionReason in Model.TaskCompletionReasons)
+                                {
+                                    <option value="@taskCompletionReason.Id">@taskCompletionReason.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label>
+                                Start
+                            </label>
+                            <input type="date" name="startFrom" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label>
+                                Due
+                            </label>
+                            <input type="date" name="endAt" class="form-control" />
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label>
+                                    Plan
+                                </label>
+                                <input type="number" name="plan" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label>
+                                    Actual
+                                </label>
+                                <input type="number" name="actual" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="text-center pt-3">
-        <button type="submit" class="btn btn-primary rounded-0" style="width:200px;">
-            <i class="fa-light fa-upload fa-fw"></i>
-        </button>
-    </div>
+            </div>
+        </div>
+
+        <div class="text-center pt-3">
+            <button type="submit" class="btn btn-primary rounded-0" style="width:200px;">
+                <i class="fa-light fa-upload fa-fw"></i>
+            </button>
+        </div>
+    </form>
 </div>

@@ -19,6 +19,10 @@ namespace clsBacklog.Models
 
         [Key, MaxLength(64)]
         public string Id { get; set; }
+
+        [MaxLength(8)]
+        public string PermaName { get; set; }
+
         [MaxLength(64), Required]
         public string Name { get; set; }
 
@@ -73,7 +77,7 @@ namespace clsBacklog.Models
 
     public class OrganizationMemberViewModel
     {
-        public OrganizationMemberViewModel(string id, UserModel? user, 
+        public OrganizationMemberViewModel(string id, UserModel? user,
             OrganizationModel? organization, string membershipType)
         {
             Id = id;

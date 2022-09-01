@@ -21,12 +21,31 @@ namespace clsBacklog.Interfaces
         PaginationModel<TaskModel> GetTasks(string projectId, string keyword, string sort, int currentPage, int itemsPerPage);
 
         /// <summary>
+        /// Get tasks in pretty mode.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        PaginationModel<TaskViewModel> GetTasksWithView(string projectId, string keyword, string sort, int currentPage, int itemsPerPage);
+
+        /// <summary>
         /// Get task.
         /// </summary>
         /// <param name="projectId"></param>
         /// <param name="id"></param>
         /// <returns></returns>
         TaskModel? GetTask(string projectId, string id);
+
+        /// <summary>
+        /// Get task in pretty mode.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        TaskViewModel? GetTaskWithView(string projectId, string id);
 
         /// <summary>
         /// Create task.
@@ -230,6 +249,41 @@ namespace clsBacklog.Interfaces
         /// <param name="id"></param>
         /// <returns></returns>
         Task<TaskTypeModel?> DeleteTaskTypeAsync(string id);
+
+        /// <summary>
+        /// Get task completion reasons.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        IList<TaskCompletionReasonModel> GetTaskCompletionReasons(string projectId);
+
+        /// <summary>
+        /// Get task completion reason.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        TaskCompletionReasonModel? GetTaskCompletionReason(string id);
+
+        /// <summary>
+        /// Create task completion reason.
+        /// </summary>
+        /// <param name="taskCompletionReason"></param>
+        /// <returns></returns>
+        Task<TaskCompletionReasonModel?> CreateTaskCompletionReasonAsync(TaskCompletionReasonModel taskCompletionReason);
+
+        /// <summary>
+        /// Update task completion.
+        /// </summary>
+        /// <param name="taskCompletionReason"></param>
+        /// <returns></returns>
+        Task<TaskCompletionReasonModel?> UpdateTaskCompletionReasonAsync(TaskCompletionReasonModel taskCompletionReason);
+
+        /// <summary>
+        /// Delete task completion reason.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<TaskCompletionReasonModel?> DeleteTaskCompletionReasonAsync(string id);
 
         /// <summary>
         /// Get task update logs.

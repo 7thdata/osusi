@@ -11,12 +11,13 @@ namespace clsBacklog.Models
     [Table("Wikis")]
     public class WikiModel : SqlDbBaseModel
     {
-        public WikiModel(string projectId, string id, string name, string description)
+        public WikiModel(string projectId, string id, string name, string description, string parentWikiId)
         {
             ProjectId = projectId;
             Id = id;
             Name = name;
             Description = description;
+            ParentWikiId = parentWikiId;
         }
 
         [Required]
@@ -28,18 +29,19 @@ namespace clsBacklog.Models
         public string Name { get; set; }
         [Required]
         public string Description { get; set; }
-        public string? ParentWikiId { get; set; }
+        public string ParentWikiId { get; set; }
     }
 
     [Table("WikiOlds")]
     public class WikiOldModel : SqlDbBaseModel
     {
-        public WikiOldModel(string originalWikiId, string id, string name, string description)
+        public WikiOldModel(string originalWikiId, string id, string name, string description, string parentWikiId)
         {
             OriginalWikiId = originalWikiId;
             Id = id;
             Name = name;
             Description = description;
+            ParentWikiId = parentWikiId;
         }
 
         [Key, MaxLength(64)]
@@ -48,7 +50,7 @@ namespace clsBacklog.Models
         public string Name { get; set; }
         [Required]
         public string Description { get; set; }
-        public string? ParentWikiId { get; set; }
+        public string ParentWikiId { get; set; }
         public string OriginalWikiId { get; set; }
     }
 }
