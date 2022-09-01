@@ -18,6 +18,11 @@ public class UserModel : IdentityUser
 
     [MaxLength(128)]
     public string Name { get; set; }
+
+ 
+
+    public string ProfileImage { get; set; }
+
     [MaxLength(64)]
     public string? OrganizationId { get; set; }
     public DateTime LastLogin { get; set; }

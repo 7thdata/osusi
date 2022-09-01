@@ -11,7 +11,7 @@ using clsBacklog.Data;
 
 namespace clsBacklog.Migrations.Application
 {
-    [DbContext(typeof(ApplicationContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20220819033837_taskcreatedBy")]
     partial class taskcreatedBy
     {

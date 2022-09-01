@@ -49,6 +49,44 @@ namespace clsBacklog.Models
 
     }
 
+    public class TaskViewModel 
+    {
+        public TaskViewModel(ProjectModel project,string id, int taskNum, string name,TaskTypeModel taskType, TaskStatusModel taskStatus)
+        {
+            Project = project;
+            Id = id;
+            TaskNum = taskNum;
+            Name = name;
+            TaskType = taskType;
+            TaskStatus = taskStatus;
+        }
+
+        public ProjectModel Project { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public TaskTypeModel TaskType { get; set; }
+        public int TaskNum { get; set; }
+        public ProjectModel? ParentProjectId { get; set; }
+        public string? Description { get; set; }
+        public TaskStatusModel TaskStatus { get; set; }
+        public int Priority { get; set; }
+        public ProjectMemberViewModel? AssignedPerson { get; set; }
+        public TaskCategoryModel? TaskCategory { get; set; }
+        public TaskMilestoneModel? TaskMilestone { get; set; }
+        public TaskVersionModel? TaskApplicableVersion { get; set; }
+        public DateTime? StartFrom { get; set; }
+        public DateTime? EndAt { get; set; }
+        public int? ExpectedTime { get; set; }
+        public int? ActualTime { get; set; }
+        public string? TimeUnit { get; set; }
+        public string? Mentions { get; set; }
+        public string? Files { get; set; }
+        public string? CreatedBy { get; set; }
+        public DateTime Created { get; set; }
+        public DateTime Modified { get; set; }
+
+    }
+
     [Table("TaskTypes")]
     public class TaskTypeModel : SqlDbBaseModel
     {
@@ -143,6 +181,25 @@ namespace clsBacklog.Models
     public class TaskMilestoneModel : SqlDbBaseModel
     {
         public TaskMilestoneModel(string projectId, string id, string name, int displayOrder)
+        {
+            ProjectId = projectId;
+            Id = id;
+            Name = name;
+            DisplayOrder = displayOrder;
+        }
+        [MaxLength(64), Required]
+        public string ProjectId { get; set; }
+        [Key, MaxLength(64)]
+        public string Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+        public int DisplayOrder { get; set; }
+    }
+
+    [Table("TaskCompletionReasons")]
+    public class TaskCompletionReasonModel : SqlDbBaseModel
+    {
+        public TaskCompletionReasonModel(string projectId, string id, string name, int displayOrder)
         {
             ProjectId = projectId;
             Id = id;

@@ -10,17 +10,13 @@ using clsBacklog.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppConfigModel>(builder.Configuration.GetSection("AppSettings"));
-var identityDbConnectionString = builder.Configuration.GetConnectionString("IdentityDbConnection") ?? throw new InvalidOperationException("Connection string 'IdentityContextConnection' not found.");
-var applicationDbConnectionString = builder.Configuration.GetConnectionString("ApplicationDbConnection") ?? throw new InvalidOperationException("Connection string 'IdentityContextConnection' not found.");
+var applicationDbConnectionString = builder.Configuration.GetConnectionString("ApplicationDbConnection") ?? throw new InvalidOperationException("Connection string 'ApplicationDbConnection' not found.");
 
-builder.Services.AddDbContext<IdentityContext>(options =>
-    options.UseSqlServer(identityDbConnectionString));
-
-builder.Services.AddDbContext<ApplicationContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(applicationDbConnectionString));
 
 builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<IdentityContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -32,10 +28,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 
 builder.Services.AddTransient<INotificationHandlers, NotificationHandlers>();
+builder.Services.AddTransient<IBlobHandlers, BlobHandlers>();
 
 builder.Services.AddTransient<IOrganizationServices, OrganizationServices>();
 builder.Services.AddTransient<IProjectServices, ProjectServices>();
 builder.Services.AddTransient<ITaskServices, TaskServices>();
+builder.Services.AddTransient<IWikiServices, WikiServices>();
+builder.Services.AddTransient<IFileServices, FileServices>();
 
 
 // Add services to the container.

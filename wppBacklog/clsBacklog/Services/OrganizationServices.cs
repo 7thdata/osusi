@@ -12,9 +12,9 @@ namespace clsBacklog.Services
 {
     public class OrganizationServices : IOrganizationServices
     {
-        private readonly IdentityContext _db;
+        private readonly ApplicationDbContext _db;
 
-        public OrganizationServices(IdentityContext db)
+        public OrganizationServices(ApplicationDbContext db)
         {
             _db = db;
         }
@@ -34,6 +34,23 @@ namespace clsBacklog.Services
             if (original != null)
             {
                 return null;
+            }
+
+            if (organization.PermaName != "")
+            {
+                // If empty then dont bother.
+                // If you are specifying perma then check
+                var originalPerma = (from p in _db.Organizations where p.PermaName == organization.PermaName select p).FirstOrDefault();
+
+                if (originalPerma != null)
+                {
+                    // If not null then no good, return null
+                    return null;
+                }
+            }
+            else
+            {
+
             }
 
             // Timestamp is overwritten here.
@@ -71,6 +88,23 @@ namespace clsBacklog.Services
                 return original;
             }
 
+            // You want to make sure if perma name is to change, the it is unique.
+            if(original.PermaName != organization.PermaName)
+            {
+
+                var originalPerma = (from p in _db.Organizations where p.PermaName == organization.PermaName select p).FirstOrDefault();
+
+                if (originalPerma == null)
+                {
+                    // Then OK
+                    original.PermaName = organization.PermaName;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+           
             original.Name = organization.Name;
             original.Subscription = organization.Subscription;
             original.CurrentSubscriptionExpires = organization.CurrentSubscriptionExpires;
@@ -97,7 +131,7 @@ namespace clsBacklog.Services
         public OrganizationModel? GetOrganization(string id)
         {
             // Get specific organization.
-            var organization = (from g in _db.Organizations where g.Id == id && g.IsDeleted == false select g).FirstOrDefault();
+            var organization = (from g in _db.Organizations where (g.Id == id || g.PermaName == id) && g.IsDeleted == false select g).FirstOrDefault();
 
             return organization;
         }
@@ -120,7 +154,7 @@ namespace clsBacklog.Services
             if (!string.IsNullOrEmpty(keyword))
             {
                 // Search logic here.
-                organizations = organizations.Where(g => g.Id.Contains(keyword) || g.Name.Contains(keyword));
+                organizations = organizations.Where(g => g.Id.Contains(keyword) || g.Name.Contains(keyword) || g.PermaName.Contains(keyword));
             }
 
             if (!string.IsNullOrEmpty(sort))
@@ -250,7 +284,7 @@ namespace clsBacklog.Services
             // Delete organization, set flag to delete.
 
             // Get the organization first.
-            var organization = (from g in _db.Organizations where g.Id == id select g).FirstOrDefault();
+            var organization = (from g in _db.Organizations where (g.Id == id || g.PermaName == id) select g).FirstOrDefault();
 
             if (organization == null)
             {
@@ -283,7 +317,7 @@ namespace clsBacklog.Services
         {
             // Get members of the organization.
 
-            var memberships = from m in _db.OrganizationMembers where m.OrganizationId == organizationId && m.IsDeleted == false select m;
+            var memberships = from m in _db.OrganizationMembers where (m.OrganizationId == organizationId) && m.IsDeleted == false select m;
 
             if (!string.IsNullOrEmpty(userId))
             {
@@ -581,5 +615,6 @@ namespace clsBacklog.Services
             return null;
 
         }
+
     }
 }

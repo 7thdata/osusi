@@ -11,13 +11,11 @@ namespace clsBacklog.Services
 {
     public class TaskServices : ITaskServices
     {
-        private readonly IdentityContext _identity;
-        private readonly ApplicationContext _db;
 
-        public TaskServices(IdentityContext identity,
-           ApplicationContext db)
+        private readonly ApplicationDbContext _db;
+
+        public TaskServices(ApplicationDbContext db)
         {
-            _identity = identity;
             _db = db;
         }
 
@@ -78,6 +76,80 @@ namespace clsBacklog.Services
         }
 
         /// <summary>
+        /// Get tasks, pretty mode.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="sort"></param>
+        /// <param name="currentPage"></param>
+        /// <param name="itemsPerPage"></param>
+        /// <returns></returns>
+        public PaginationModel<TaskViewModel> GetTasksWithView(string projectId, string keyword, string sort, int currentPage, int itemsPerPage)
+        {
+            var tasks = from p in _db.Tasks
+                        join s in _db.TaskStatus on p.Status equals s.Id
+                        join t in _db.TaskTypes on p.TaskType equals t.Id
+                        join j in _db.Projects on p.ProjectId equals j.Id
+                        where p.IsDeleted == false && p.ProjectId == projectId
+                        select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t, s)
+                        {
+                            ActualTime = p.ActualTime,
+                            AssignedPerson = null,
+                            EndAt = p.EndAt,
+                            ExpectedTime = p.ExpectedTime,
+                            CreatedBy = p.CreatedBy,
+                            Description = p.Description,
+                            Priority = p.Priority,
+                            StartFrom = p.StartFrom,
+                            TimeUnit = p.TimeUnit,
+                            Created = p.Created,
+                            Modified = p.Modified
+                        };
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                // Search logic here.
+                tasks = tasks.Where(g => g.Name.Contains(keyword) || g.Id.Contains(keyword));
+            }
+
+            if (!string.IsNullOrEmpty(sort))
+            {
+                // Sort logic here.
+            }
+            else
+            {
+                // Default sort here.
+                tasks = tasks.OrderBy(g => g.Created);
+            }
+
+            // Size
+            int totalItems = tasks.Count();
+            int totalPages = 0;
+
+            if (totalItems > 0)
+            {
+                totalPages = (totalItems / itemsPerPage) + 1;
+            }
+
+            // Skip, and take.
+            tasks = tasks.Skip((currentPage - 1) * itemsPerPage);
+            tasks = tasks.Take(itemsPerPage);
+
+            var result = new PaginationModel<TaskViewModel>()
+            {
+                Items = tasks.ToList(),
+                Sort = sort,
+                Keyword = keyword,
+                CurrentPage = currentPage,
+                ItemsPerPage = itemsPerPage,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+
+            return result;
+        }
+
+        /// <summary>
         /// Get specific task.
         /// </summary>
         /// <param name="projectId"></param>
@@ -87,6 +159,39 @@ namespace clsBacklog.Services
         {
             // Get specific task.
             var task = (from g in _db.Tasks where g.ProjectId == projectId && g.Id == id && g.IsDeleted == false select g).FirstOrDefault();
+
+            return task;
+        }
+
+
+        /// <summary>
+        /// Get task with view.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public TaskViewModel? GetTaskWithView(string projectId, string id)
+        {
+            // Get specific task.
+            var task = (from p in _db.Tasks
+                        join s in _db.TaskStatus on p.Status equals s.Id
+                        join t in _db.TaskTypes on p.TaskType equals t.Id
+                        join j in _db.Projects on p.ProjectId equals j.Id
+                        where p.IsDeleted == false && p.ProjectId == projectId && p.Id == id
+                        select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t, s)
+                        {
+                            ActualTime = p.ActualTime,
+                            AssignedPerson = null,
+                            EndAt = p.EndAt,
+                            ExpectedTime = p.ExpectedTime,
+                            CreatedBy = p.CreatedBy,
+                            Description = p.Description,
+                            Priority = p.Priority,
+                            StartFrom = p.StartFrom,
+                            TimeUnit = p.TimeUnit,
+                            Created = p.Created,
+                            Modified = p.Modified
+                        }).FirstOrDefault();
 
             return task;
         }
@@ -761,6 +866,118 @@ namespace clsBacklog.Services
             // await _db.SaveChangesAsync();
 
             return taskType;
+        }
+
+
+        /// <summary>
+        /// Get task completion reasons.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <returns></returns>
+        public IList<TaskCompletionReasonModel> GetTaskCompletionReasons(string projectId)
+        {
+            var taskCompletionReasons = from c in _db.TaskCompletionReasons
+                                        where c.ProjectId == projectId &&
+                                      c.IsDeleted == false
+                                        orderby c.DisplayOrder
+                                        select c;
+            return taskCompletionReasons.ToList();
+        }
+
+        /// <summary>
+        /// Vet task completion reason.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public TaskCompletionReasonModel? GetTaskCompletionReason(string id)
+        {
+            var taskCompletionReason = (from t in _db.TaskCompletionReasons where t.Id == id select t).FirstOrDefault();
+
+            return taskCompletionReason;
+        }
+
+        /// <summary>
+        /// Create task completion reason.
+        /// </summary>
+        /// <param name="taskCompletionReason"></param>
+        /// <returns></returns>
+        public async Task<TaskCompletionReasonModel?> CreateTaskCompletionReasonAsync(TaskCompletionReasonModel taskCompletionReason)
+        {
+            // Create 
+
+            // Make sure there is no duplicate.
+            var original = (from g in _db.TaskCompletionReasons where g.Id == taskCompletionReason.Id select g).FirstOrDefault();
+
+            if (original != null)
+            {
+                return null;
+            }
+
+            // Timestamp is overwritten here.
+            taskCompletionReason.Created = DateTime.Now;
+
+            _db.TaskCompletionReasons.Add(taskCompletionReason);
+            await _db.SaveChangesAsync();
+
+            return taskCompletionReason;
+        }
+
+        /// <summary>
+        /// Update task completion reason.
+        /// </summary>
+        /// <param name="taskCompletionReason"></param>
+        /// <returns></returns>
+
+        public async Task<TaskCompletionReasonModel?> UpdateTaskCompletionReasonAsync(TaskCompletionReasonModel taskCompletionReason)
+        {
+            // Update project
+
+            // Get
+            var original = (from g in _db.TaskCompletionReasons where g.Id == taskCompletionReason.Id select g).FirstOrDefault();
+
+            if (original == null)
+            {
+                return original;
+            }
+
+            original.Name = taskCompletionReason.Name;
+            original.DisplayOrder = taskCompletionReason.DisplayOrder;
+
+            _db.TaskCompletionReasons.Update(original);
+
+            await _db.SaveChangesAsync();
+
+            return original;
+        }
+
+        /// <summary>
+        /// Delete task completion reason.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<TaskCompletionReasonModel?> DeleteTaskCompletionReasonAsync(string id)
+        {
+            // Delete project, set flag to delete.
+
+            // Get
+            var original = (from g in _db.TaskCompletionReasons where g.Id == id select g).FirstOrDefault();
+
+            if (original == null)
+            {
+                return null;
+            }
+
+            original.IsDeleted = true;
+            original.Deleted = DateTime.Now;
+
+            _db.TaskCompletionReasons.Update(original);
+            await _db.SaveChangesAsync();
+
+            // If you want to delete physically, uncomment the code below.
+            // _db.TaskCompletionReasons.Remove(original);
+            // await _db.SaveChangesAsync();
+
+            return original;
         }
 
         /// <summary>

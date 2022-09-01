@@ -1,5 +1,5 @@
 ﻿@using wppBacklog.Areas.Usr.Models
-@model UsrWikiIndexViewModel
+@model UsrWikiDetailsViewModel
 @{
     ViewData["Title"] = Model.Title;
     ViewData["OrganizationId"] = Model.Organization.Id;
@@ -28,46 +28,19 @@
             </ol>
         </nav>
     </div>
+    <div>
+        <h1>
+            @Model.Wiki.Name (<a href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/wikis/@Model.Wiki.ParentWikiId/wiki/@Model.Wiki.Id/edit">Edit</a>)
+        </h1>
 
-    
-    <div class="d-flex justify-content-between">
         <div>
-            <form method="get">
-                <div class="input-group">
-                    <input type="text" name="keyword" class="form-control" />
-                    <button class="btn btn-secondary" type="submit"><i class="fa-light fa-magnifying-glass fa-fw"></i></button>
-                </div>
-            </form>
-        </div>
-        <div>
-            <a class="btn btn-secondary rounded-0" href="">
-                <i class="fa-light fa-plus fa-fw"></i>
-            </a>
+            @Model.Description
         </div>
     </div>
-
     <div>
-        <!-- Show list of Wikis-->
-        @if (Model.Wikis.Items != null)
-        {
-            <table class="table">
-                @foreach (var wiki in Model.Wikis.Items)
-                {
-                    <tr>
-                        <td>
-                            <a href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/wiki/@wiki.Id">
-                                @wiki.Name
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </table>
-        }
-        else
-        {
-            <div class="py-5 text-center">
-                No wikis.
-            </div>
-        }
+        <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/wiki/@Model.Wiki.Id/delete" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger rounded-0">Delete</button>
+        </form>
     </div>
 </div>

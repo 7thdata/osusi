@@ -301,6 +301,36 @@
                     }
                 }
             </div>
+
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Completion Reason
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#completionReasonModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ListOfTaskCompletionReasons != null)
+                {
+                    foreach (var reason in Model.ListOfTaskCompletionReasons)
+                    {
+                        <div class="card card-body bg-transparent my-2">
+                            <div class="d-flex">
+                                <div style="width:20px;" class="text-end">
+                                    @reason.DisplayOrder
+                                </div>
+                                <div class="mx-2 p-2 w-100">
+                                    <a onClick="mapReasonValue('@reason.Name','@reason.Id','@reason.Name','@reason.DisplayOrder')">
+                                        @reason.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
         </div>
         <div class="col-md-6">
             <div class="card card-body bg-transparent my-2">
@@ -388,6 +418,58 @@
                     </div>
                 </form>
                 <hr />
+
+                <table class="table table-bordered border-none">
+                    <tr>
+                        <td style="background-color:#C0C0C0" class="font-sm">
+                            Silver #C0C0C0
+                        </td>
+                        <td style="background-color:#FF0000" class="font-sm">
+                            Red #FF0000
+                        </td>
+                        <td style="background-color:#800000" class="font-sm">
+                            Maroon #800000
+                        </td>
+                        <td style="background-color:#FFFF00" class="font-sm">
+                            Yellow #FFFF00
+                        </td>
+                        <td style="background-color:#808000" class="font-sm">
+                            Olive #808000
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#00FF00" class="font-sm">
+                            Lime #00FF00
+                        </td>
+                        <td style="background-color:#008000" class="font-sm">
+                            Green #008000
+                        </td>
+                        <td style="background-color:#00FFFF" class="font-sm">
+                            Aqua #00FFFF
+                        </td>
+                        <td style="background-color:#008080" class="font-sm">
+                            Teal #008080
+                        </td>
+                        <td style="background-color:#0000FF" class="font-sm">
+                            Blue #0000FF
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#000080" class="font-sm">
+                            Navy #000080
+                        </td>
+
+                        <td style="background-color:#FF00FF" class="font-sm">
+                            Fuchsia #FF00FF
+                        </td>
+
+                        <td style="background-color:#800080" class="font-sm">
+                            Purple #800080
+                        </td>
+                    </tr>
+                </table>
+
+                <hr />
                 <form id="deleteStatusForm" class="text-end" action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/status/delete" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="statusDeleteId" value="" name="id" />
@@ -438,6 +520,57 @@
                         </button>
                     </div>
                 </form>
+                <hr />
+                <table class="table table-bordered border-none">
+                    <tr>
+                        <td style="background-color:#C0C0C0" class="font-sm">
+                            Silver #C0C0C0
+                        </td>
+                        <td style="background-color:#FF0000" class="font-sm">
+                            Red #FF0000
+                        </td>
+                        <td style="background-color:#800000" class="font-sm">
+                            Maroon #800000
+                        </td>
+                        <td style="background-color:#FFFF00" class="font-sm">
+                            Yellow #FFFF00
+                        </td>
+                        <td style="background-color:#808000" class="font-sm">
+                            Olive #808000
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#00FF00" class="font-sm">
+                            Lime #00FF00
+                        </td>
+                        <td style="background-color:#008000" class="font-sm">
+                            Green #008000
+                        </td>
+                        <td style="background-color:#00FFFF" class="font-sm">
+                            Aqua #00FFFF
+                        </td>
+                        <td style="background-color:#008080" class="font-sm">
+                            Teal #008080
+                        </td>
+                        <td style="background-color:#0000FF" class="font-sm">
+                            Blue #0000FF
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#000080" class="font-sm">
+                            Navy #000080
+                        </td>
+
+                        <td style="background-color:#FF00FF" class="font-sm">
+                            Fuchsia #FF00FF
+                        </td>
+
+                        <td style="background-color:#800080" class="font-sm">
+                            Purple #800080
+                        </td>
+                    </tr>
+                </table>
+
                 <hr />
                 <form id="deleteTypeForm" action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/type/delete" method="post" class="text-end">
                     @Html.AntiForgeryToken()
@@ -579,6 +712,49 @@
     </div>
 </div>
 
+<!-- Modal Completion Reason -->
+<div class="modal fade" id="completionReasonModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completionReasonTitleLabel">Add New Completion Reason</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/completionReason/upsert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="completionReasonId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" id="completionReasonName" class="form-control" name="name" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Display Order</label>
+                        <input type="number" id="completionReasonDisplayOrder" class="form-control" name="displayOrder" />
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary rounded-0" type="submit">
+                            <i class="fa-light fa-upload fa-fw"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr />
+                <form id="deleteTypeForm" action="/@Model.Culture/version/milestone/delete" method="post" class="text-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="versionDeleteId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <button class="btn btn-danger rounded-0" type="submit">
+                            <i class="fa-light fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Modal Member -->
 <div class="modal fade" id="memberModal" tabindex="-1">
@@ -596,71 +772,71 @@
 </div>
 
 @section Scripts{
-    <script>
+<script>
 
-        function mapStatusValue(title, id, name, color, textColor, displayOrder) {
-            $("#statusTitleLabel").text(title)
-            $("#statusId").val(id);
-            $("#statusName").val(name);
-            $("#statusColor").val(color);
-            $("#statusTextColor").val(textColor);
-            $("#statusDisplayOrder").val(displayOrder);
-            $("#statusDeleteId").val(id);
+    function mapStatusValue(title, id, name, color, textColor, displayOrder) {
+        $("#statusTitleLabel").text(title)
+        $("#statusId").val(id);
+        $("#statusName").val(name);
+        $("#statusColor").val(color);
+        $("#statusTextColor").val(textColor);
+        $("#statusDisplayOrder").val(displayOrder);
+        $("#statusDeleteId").val(id);
 
-            /* Modal */
-            const myModal = new bootstrap.Modal('#statusModal');
-            myModal.toggle();
-        }
+        /* Modal */
+        const myModal = new bootstrap.Modal('#statusModal');
+        myModal.toggle();
+    }
 
-        function mapTypeValue(title, id, name, color, textColor, displayOrder) {
-            $("#typeTitleLabel").text(title)
-            $("#typeId").val(id);
-            $("#typeName").val(name);
-            $("#typeColor").val(color);
-            $("#typeTextColor").val(textColor);
-            $("#typeDisplayOrder").val(displayOrder);
-            $("#typeDeleteId").val(id);
+    function mapTypeValue(title, id, name, color, textColor, displayOrder) {
+        $("#typeTitleLabel").text(title)
+        $("#typeId").val(id);
+        $("#typeName").val(name);
+        $("#typeColor").val(color);
+        $("#typeTextColor").val(textColor);
+        $("#typeDisplayOrder").val(displayOrder);
+        $("#typeDeleteId").val(id);
 
-            /* Modal */
-            const myModal = new bootstrap.Modal('#typeModal');
-            myModal.toggle();
-        }
+        /* Modal */
+        const myModal = new bootstrap.Modal('#typeModal');
+        myModal.toggle();
+    }
 
-        function mapCategoryValue(title, id, name, displayOrder) {
-            $("#categoryTitleLabel").text(title)
-            $("#categoryId").val(id);
-            $("#categoryName").val(name);
-            $("#categoryDisplayOrder").val(displayOrder);
-            $("#categoryDeleteId").val(id);
+    function mapCategoryValue(title, id, name, displayOrder) {
+        $("#categoryTitleLabel").text(title)
+        $("#categoryId").val(id);
+        $("#categoryName").val(name);
+        $("#categoryDisplayOrder").val(displayOrder);
+        $("#categoryDeleteId").val(id);
 
-            /* Modal */
-            const myModal = new bootstrap.Modal('#categoryModal');
-            myModal.toggle();
-        }
+        /* Modal */
+        const myModal = new bootstrap.Modal('#categoryModal');
+        myModal.toggle();
+    }
 
-        function mapMilestoneValue(title, id, name, displayOrder) {
-            $("#milestoneTitleLabel").text(title)
-            $("#milestoneId").val(id);
-            $("#milestoneName").val(name);
-            $("#milestoneDisplayOrder").val(displayOrder);
-            $("#milestoneDeleteId").val(id);
+    function mapMilestoneValue(title, id, name, displayOrder) {
+        $("#milestoneTitleLabel").text(title)
+        $("#milestoneId").val(id);
+        $("#milestoneName").val(name);
+        $("#milestoneDisplayOrder").val(displayOrder);
+        $("#milestoneDeleteId").val(id);
 
-            /* Modal */
-            const myModal = new bootstrap.Modal('#milestoneModal');
-            myModal.toggle();
-        }
+        /* Modal */
+        const myModal = new bootstrap.Modal('#milestoneModal');
+        myModal.toggle();
+    }
 
-        function mapVersionValue(title, id, name, displayOrder) {
-            $("#versionTitleLabel").text(title)
-            $("#versionId").val(id);
-            $("#versionName").val(name);
-            $("#versionDisplayOrder").val(displayOrder);
-            $("#versionDeleteId").val(id);
+    function mapVersionValue(title, id, name, displayOrder) {
+        $("#versionTitleLabel").text(title)
+        $("#versionId").val(id);
+        $("#versionName").val(name);
+        $("#versionDisplayOrder").val(displayOrder);
+        $("#versionDeleteId").val(id);
 
-            /* Modal */
-            const myModal = new bootstrap.Modal('#versionModal');
-            myModal.toggle();
-        }
+        /* Modal */
+        const myModal = new bootstrap.Modal('#versionModal');
+        myModal.toggle();
+    }
 
-    </script>
+</script>
     }
