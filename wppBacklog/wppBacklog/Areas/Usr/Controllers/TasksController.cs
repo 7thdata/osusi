@@ -37,7 +37,9 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/tasks")]
-        public async Task<IActionResult> Index(string culture, string organizationId, string projectId, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50)
+        public async Task<IActionResult> Index(string culture, string organizationId, string projectId, string keyword, string sort, 
+            string filterTaskStatus,
+            int currentPage = 1, int itemsPerPage = 50)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
@@ -64,9 +66,10 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return NotFound();
             }
 
+            // filters
 
             // Show tasks.
-            var tasks = _taskServices.GetTasksWithView(project.Id, keyword, sort, currentPage, itemsPerPage);
+            var tasks = _taskServices.GetTasksWithView(project.Id, keyword, sort, filterTaskStatus, currentPage, itemsPerPage);
 
             var assignableMembers = _projectServices.GetProjectMembersViewInList(project.OwnerId, project.Id);
             var taskCategories = _taskServices.GetCategories(project.Id);
@@ -259,7 +262,7 @@ namespace wppBacklog.Areas.Usr.Controllers
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/task/{taskId}/log/upsert")]
         public async Task<IActionResult> UpsertLog(string culture, string organizationId, string projectId,
-            string taskId, string id, string comment, string assignedPerson, string taskStatus,
+            string taskId, string id, string comment, string assignPerson, string taskStatus,
             string taskMilestone, string completeReason, DateTime startFrom, DateTime endAt, int plan, int actual)
         {
 
@@ -296,7 +299,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             var log = await _taskServices.CreateTaskUpdateAsync(new TaskUpdateModel(projectId, taskId, id, comment, currentUser.Id)
             {
                 Status = taskStatus,
-                AssinedPerson = assignedPerson,
+                AssinedPerson = assignPerson,
                 Milestone = taskMilestone,
                 Reason = completeReason,
                 StartFrom = startFrom,

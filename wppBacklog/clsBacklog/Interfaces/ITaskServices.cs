@@ -15,21 +15,25 @@ namespace clsBacklog.Interfaces
         /// <param name="projectId"></param>
         /// <param name="keyword"></param>
         /// <param name="sort"></param>
+        /// <param name="taskStatusFilter"></param>
         /// <param name="currentPage"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
         PaginationModel<TaskModel> GetTasks(string projectId, string keyword, string sort, int currentPage, int itemsPerPage);
 
         /// <summary>
-        /// Get tasks in pretty mode.
+        /// Get tasks with view.
         /// </summary>
         /// <param name="projectId"></param>
         /// <param name="keyword"></param>
         /// <param name="sort"></param>
+        /// <param name="taskStatuses"></param>
         /// <param name="currentPage"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
-        PaginationModel<TaskViewModel> GetTasksWithView(string projectId, string keyword, string sort, int currentPage, int itemsPerPage);
+        PaginationModel<TaskViewModel> GetTasksWithView(string projectId, string keyword, string sort,
+            string taskStatusFilter,
+            int currentPage, int itemsPerPage);
 
         /// <summary>
         /// Get task.

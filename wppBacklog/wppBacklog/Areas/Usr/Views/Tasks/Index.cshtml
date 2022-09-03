@@ -31,22 +31,39 @@
         </nav>
     </div>
 
-    <div class="d-flex justify-content-between">
-        <div>
-            <form method="get">
-                <div class="input-group">
-                    <input type="text" name="keyword" class="form-control" />
-                    <button class="btn btn-secondary" type="submit"><i class="fa-light fa-magnifying-glass fa-fw"></i></button>
-                </div>
-            </form>
-        </div>
-        <div>
-            <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newTaskModal">
-                <i class="fa-light fa-plus fa-fw"></i>
-            </button>
-        </div>
-    </div>
 
+    <form method="get" class="">
+        <lable>Keyword</lable>
+        <input type="text" name="keyword" class="form-control" />
+
+        <div class="row">
+            <div class="col-md-4 my-2">
+                <lable>Status</lable>
+                <select class="form-select" name="filterTaskStatus">
+                    <option value="">Any</option>
+                    @foreach (var taskStatus in Model.TaskStatuses)
+                    {
+                        <option value="@taskStatus.Id">
+                            @taskStatus.Name
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4 my-2">
+            </div>
+            <div class="col-md-4 my-2">
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-secondary" type="submit"><i class="fa-light fa-magnifying-glass fa-fw"></i></button>
+        </div>
+    </form>
+
+    <div class="text-end">
+        <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+            <i class="fa-light fa-plus fa-fw"></i>
+        </button>
+    </div>
     <div class="table-responsive">
         @if (Model.Tasks.Items != null)
         {
@@ -58,7 +75,6 @@
                     <td>
                         Id,Name
                     </td>
-
                     <td>
                         Assined To
                     </td>
@@ -102,19 +118,23 @@
                                 </span>
                             </div>
                             <div>
-                                <a class="stretched-link" href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@task.Id">
+                                <a class="" href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@task.Id">
                                     @task.Name
                                 </a>
                             </div>
                         </td>
 
                         <td>
-                            @task.AssignedPerson
+                            <img src="@task.AssignedPerson?.User?.ProfileImage" style="width:30px;" class="rounded" />
                         </td>
                         <td>
-                            <div class="p-1 rounded" style="background-color:@task.TaskStatus.Color; color:@task.TaskStatus.TextColor">
-                                @task.TaskStatus.Name
-                            </div>
+                            @if (task.TaskStatus != null)
+                            {
+                                <div class="p-1 rounded" style="background-color:@task.TaskStatus?.Color; color:@task.TaskStatus?.TextColor">
+                                    @task.TaskStatus?.Name
+                                </div>
+                            }
+
                         </td>
                         <td>
                             @task.Priority
@@ -146,10 +166,9 @@
                                     @task.StartFrom?.ToString("yyyy-MM-dd")
                                 </span>
                             }
-
                         </td>
                         <td>
-                             @if (task.EndAt > DateTime.MinValue)
+                            @if (task.EndAt > DateTime.MinValue)
                             {
                                 <span>
                                     @task.EndAt?.ToString("yyyy-MM-dd")
@@ -220,7 +239,7 @@
                             <div class="col-md-6 my-2">
                                 <label>Assign</label>
 
-                                <select class="form-select" name="assignPersonId">
+                                <select class="form-select" name="assignPerson">
                                     <option value="">Select assign person.</option>
                                     @foreach (var member in Model.AssignableMembers)
                                     {

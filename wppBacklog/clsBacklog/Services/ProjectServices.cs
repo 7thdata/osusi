@@ -397,7 +397,7 @@ namespace clsBacklog.Services
         {
             // Get project members.
             var memberships = from t in _db.ProjectMembers
-                              join o in _db.Users on t.UserId equals o.Id
+                              join o in _db.Users on t.UserId equals o.Id where t.ProjectId == projectId
                               select new ProjectMemberViewModel(t.Id, t.ProjectId, o, t.MembershipType);
 
             return memberships.ToList();

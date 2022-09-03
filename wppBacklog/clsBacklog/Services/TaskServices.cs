@@ -76,25 +76,35 @@ namespace clsBacklog.Services
         }
 
         /// <summary>
-        /// Get tasks, pretty mode.
+        /// Get tasks.
         /// </summary>
         /// <param name="projectId"></param>
         /// <param name="keyword"></param>
         /// <param name="sort"></param>
+        /// <param name="taskStatusFilter"></param>
         /// <param name="currentPage"></param>
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
-        public PaginationModel<TaskViewModel> GetTasksWithView(string projectId, string keyword, string sort, int currentPage, int itemsPerPage)
+        public PaginationModel<TaskViewModel> GetTasksWithView(string projectId, string keyword, string sort,
+            string taskStatusFilter,
+            int currentPage, int itemsPerPage)
         {
             var tasks = from p in _db.Tasks
-                        join s in _db.TaskStatus on p.Status equals s.Id
                         join t in _db.TaskTypes on p.TaskType equals t.Id
                         join j in _db.Projects on p.ProjectId equals j.Id
                         where p.IsDeleted == false && p.ProjectId == projectId
-                        select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t, s)
+                        select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t)
                         {
                             ActualTime = p.ActualTime,
-                            AssignedPerson = null,
+                            AssignedPerson = (from a in _db.ProjectMembers
+                                              join u in _db.Users on a.UserId equals u.Id
+                                              where a.Id == p.AssignedPerson
+                                              select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
+                                              {
+                                                  Created = a.Created
+                                              }).FirstOrDefault(),
+                            TaskStatusId = p.Status,
+                            TaskStatus = string.IsNullOrEmpty(p.Status) ? null : (from s in _db.TaskStatus where s.Id == p.Status select s).FirstOrDefault(),
                             EndAt = p.EndAt,
                             ExpectedTime = p.ExpectedTime,
                             CreatedBy = p.CreatedBy,
@@ -110,6 +120,13 @@ namespace clsBacklog.Services
             {
                 // Search logic here.
                 tasks = tasks.Where(g => g.Name.Contains(keyword) || g.Id.Contains(keyword));
+            }
+
+
+            if (!string.IsNullOrEmpty(taskStatusFilter))
+            {
+                // Search logic here.
+                tasks = tasks.Where(g => g.TaskStatusId == taskStatusFilter);
             }
 
             if (!string.IsNullOrEmpty(sort))
@@ -174,17 +191,24 @@ namespace clsBacklog.Services
         {
             // Get specific task.
             var task = (from p in _db.Tasks
-                        join s in _db.TaskStatus on p.Status equals s.Id
                         join t in _db.TaskTypes on p.TaskType equals t.Id
                         join j in _db.Projects on p.ProjectId equals j.Id
                         where p.IsDeleted == false && p.ProjectId == projectId && p.Id == id
-                        select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t, s)
+                        select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t)
                         {
                             ActualTime = p.ActualTime,
-                            AssignedPerson = null,
+                            AssignedPerson = (from a in _db.ProjectMembers
+                                              join u in _db.Users on a.UserId equals u.Id
+                                              where a.Id == p.AssignedPerson
+                                              select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
+                                              {
+                                                  Created = a.Created
+                                              }).FirstOrDefault(),
                             EndAt = p.EndAt,
                             ExpectedTime = p.ExpectedTime,
                             CreatedBy = p.CreatedBy,
+                            TaskStatusId = p.Status,
+                            TaskStatus = string.IsNullOrEmpty(p.Status) ? null : (from s in _db.TaskStatus where s.Id == p.Status select s).FirstOrDefault(),
                             Description = p.Description,
                             Priority = p.Priority,
                             StartFrom = p.StartFrom,
@@ -1009,6 +1033,44 @@ namespace clsBacklog.Services
 
             update.Created = DateTime.Now;
 
+
+            // Update parent task.
+            var task = (from t in _db.Tasks where t.Id == update.TaskId select t).FirstOrDefault();
+
+            if (task == null)
+            {
+                // Bad request
+                return null;
+            }
+
+            // Check status
+            if (task.Status != update.Status)
+            {
+                task.Status = update.Status;
+                update.Description += "Updated status.";
+            }
+
+            if (task.AssignedPerson != update.AssinedPerson)
+            {
+                task.AssignedPerson = update.AssinedPerson;
+                update.Description += "Updated assign person.";
+            }
+
+            if (task.TaskMilestone != update.Milestone)
+            {
+                task.TaskMilestone = update.Milestone;
+                update.Description += "Updated milestone.";
+            }
+
+            if (task.TaskCompletionReason != update.Reason)
+            {
+                task.TaskCompletionReason = update.Reason;
+                update.Description += "Updated complete reason";
+            }
+
+            task.Modified = DateTime.Now;
+
+            _db.Tasks.Update(task);
             _db.TaskUpdates.Add(update);
 
             await _db.SaveChangesAsync();

@@ -47,9 +47,12 @@
                 @Model.Task.Project.PermaName - @Model.Task.TaskNum  Url
             </div>
             <div>
-                <span>
-                    @Model.Task.TaskStatus.Name
-                </span>
+                @if (Model.Task.TaskStatus != null)
+                {
+                    <span>
+                        @Model.Task.TaskStatus.Name
+                    </span>
+                }
 
                 @if (Model.Task.StartFrom > DateTime.MinValue)
                 {
@@ -225,9 +228,18 @@
                         <option value="">Select status.</option>
                         @foreach (var taskStatus in Model.TaskStatuses)
                         {
-                            <option value="@taskStatus.Id">
-                                @taskStatus.Name
-                            </option>
+                            if (taskStatus == Model.Task.TaskStatus)
+                            {
+                                <option selected value="@taskStatus.Id">
+                                    @taskStatus.Name
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@taskStatus.Id">
+                                    @taskStatus.Name
+                                </option>
+                            }
                         }
                     </select>
                 </div>
@@ -241,7 +253,14 @@
                                 <option value="">Select assign person.</option>
                                 @foreach (var member in Model.AssignableMembers)
                                 {
-                                    <option value="@member.Id">@member.User?.Name</option>
+                                    if (member.Id == Model.Task.AssignedPerson?.Id)
+                                    {
+                                        <option selected value="@member.Id">@member.User?.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@member.Id">@member.User?.Name</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -253,7 +272,14 @@
                                 <option value="">Select milestone.</option>
                                 @foreach (var milestone in Model.TaskMilestones)
                                 {
-                                    <option value="@milestone.Id">@milestone.Name</option>
+                                    if (milestone.Id == Model.Task.TaskMilestone?.Id)
+                                    {
+                                        <option selected value="@milestone.Id">@milestone.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@milestone.Id">@milestone.Name</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -275,26 +301,40 @@
                             <label>
                                 Start
                             </label>
-                            <input type="date" name="startFrom" class="form-control" />
+                            @if (Model.Task.StartFrom > DateTime.MinValue)
+                            {
+                                <input type="date" name="startFrom" value="@Model.Task.StartFrom?.ToString("yyyy-MM-dd")" class="form-control" />
+                            }
+                            else
+                            {
+                                <input type="date" name="startFrom" class="form-control" />
+                            }
                         </div>
                         <div class="mb-3">
                             <label>
                                 Due
                             </label>
-                            <input type="date" name="endAt" class="form-control" />
+                            @if (Model.Task.EndAt > DateTime.MinValue)
+                            {
+                                <input type="date" name="endAt" value="@Model.Task.EndAt?.ToString("yyyy-MM-dd")" class="form-control" />
+                            }
+                            else
+                            {
+                                <input type="date" name="endAt" class="form-control" />
+                            }
                         </div>
                         <div class="row">
                             <div class="col-6">
                                 <label>
                                     Plan
                                 </label>
-                                <input type="number" name="plan" class="form-control" />
+                                <input type="number" value="@Model.Task.ExpectedTime" name="plan" class="form-control" />
                             </div>
                             <div class="col-6">
                                 <label>
                                     Actual
                                 </label>
-                                <input type="number" name="actual" class="form-control" />
+                                <input type="number" value="@Model.Task.ActualTime" name="actual" class="form-control" />
                             </div>
                         </div>
                     </div>

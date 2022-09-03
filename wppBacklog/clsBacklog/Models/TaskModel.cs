@@ -33,6 +33,7 @@ namespace clsBacklog.Models
         public string? ParentProjectId { get; set; }
         public string? Description { get; set; }
         public string? Status { get; set; }
+        
         public int Priority { get; set; }
         public string? AssignedPerson { get; set; }
         public string? TaskCategory { get; set; }
@@ -46,19 +47,20 @@ namespace clsBacklog.Models
         public string? Mentions { get; set; }
         public string? Files { get; set; }
         public string? CreatedBy { get; set; }
+        public string? TaskCompletionReason { get; set; }
 
     }
 
     public class TaskViewModel 
     {
-        public TaskViewModel(ProjectModel project,string id, int taskNum, string name,TaskTypeModel taskType, TaskStatusModel taskStatus)
+        public TaskViewModel(ProjectModel project,string id, int taskNum, string name,
+            TaskTypeModel taskType)
         {
             Project = project;
             Id = id;
             TaskNum = taskNum;
             Name = name;
             TaskType = taskType;
-            TaskStatus = taskStatus;
         }
 
         public ProjectModel Project { get; set; }
@@ -68,7 +70,8 @@ namespace clsBacklog.Models
         public int TaskNum { get; set; }
         public ProjectModel? ParentProjectId { get; set; }
         public string? Description { get; set; }
-        public TaskStatusModel TaskStatus { get; set; }
+        public TaskStatusModel? TaskStatus { get; set; }
+        public string? TaskStatusId { get; set; }
         public int Priority { get; set; }
         public ProjectMemberViewModel? AssignedPerson { get; set; }
         public TaskCategoryModel? TaskCategory { get; set; }
