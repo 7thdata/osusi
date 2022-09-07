@@ -91,6 +91,15 @@ namespace clsBacklog.Interfaces
         PaginationModel<ProjectMemberViewModel> GetProjectMembersView(string organizationId, string projectId, string userId, string sort, int currentPage, int itemsPerPage);
 
         /// <summary>
+        /// Get project member.
+        /// </summary>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        ProjectMemberViewModel? GetProjectMemberViewByUid(string organizationId, string projectId, string userId);
+
+        /// <summary>
         /// Get project members in list.
         /// </summary>
         /// <param name="organizationId"></param>
