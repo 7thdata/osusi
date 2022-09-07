@@ -32,7 +32,7 @@ namespace clsBacklog.Services
             if (!string.IsNullOrEmpty(keyword))
             {
                 // Search logic here.
-                projects = projects.Where(g => g.Id.Contains(keyword) || g.Name.Contains(keyword) || g.PermaName.Contains(keyword) );
+                projects = projects.Where(g => g.Id.Contains(keyword) || g.Name.Contains(keyword) || g.PermaName.Contains(keyword));
             }
 
             if (!string.IsNullOrEmpty(sort))
@@ -84,14 +84,14 @@ namespace clsBacklog.Services
         /// <returns></returns>
         public PaginationModel<ProjectViewModel> GetProjectsView(string userId, string keyword, string sort, int currentPage, int itemsPerPage)
         {
-           
+
             // join project and organizaion
-            var projects = from t in _db.Projects 
+            var projects = from t in _db.Projects
                            join m in _db.ProjectMembers on t.Id equals m.ProjectId
-                           join f in _db.Organizations on t.OwnerId equals f.Id 
+                           join f in _db.Organizations on t.OwnerId equals f.Id
                            join g in _db.OrganizationMembers on f.Id equals g.OrganizationId
                            where m.IsDeleted == false && g.IsDeleted == false && t.IsDeleted == false && f.IsDeleted == false
-                           select new ProjectViewModel(t,f);
+                           select new ProjectViewModel(t, f);
 
 
             if (!string.IsNullOrEmpty(keyword))
@@ -383,6 +383,26 @@ namespace clsBacklog.Services
             return result;
         }
 
+
+        /// <summary>
+        /// Get project member by uid.
+        /// </summary>
+        /// <param name="organizationId"></param>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public ProjectMemberViewModel? GetProjectMemberViewByUid(string organizationId, string projectId, string userId)
+        {
+            // Get members of the organization.
+            var membership = (from t in _db.ProjectMembers
+                              join o in _db.Users on t.UserId equals o.Id
+                              where t.UserId == userId && t.ProjectId == projectId
+                              select new ProjectMemberViewModel(t.Id, t.ProjectId, o, t.MembershipType)).FirstOrDefault();
+
+            return membership;
+        }
+
+
         /// <summary>
         /// Get members with view in list.
         /// </summary>
@@ -397,7 +417,8 @@ namespace clsBacklog.Services
         {
             // Get project members.
             var memberships = from t in _db.ProjectMembers
-                              join o in _db.Users on t.UserId equals o.Id where t.ProjectId == projectId
+                              join o in _db.Users on t.UserId equals o.Id
+                              where t.ProjectId == projectId
                               select new ProjectMemberViewModel(t.Id, t.ProjectId, o, t.MembershipType);
 
             return memberships.ToList();

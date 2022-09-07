@@ -41,15 +41,15 @@
     <div class="mb-3">
         <div class="d-flex justify-content-between">
             <div class="">
-                <span>
+                <span class="badge" style="background-color:@Model.Task.TaskType.Color; color:@Model.Task.TaskType.TextColor">
                     @Model.Task.TaskType.Name
                 </span>
-                @Model.Task.Project.PermaName - @Model.Task.TaskNum  Url
+                <span>@Model.Task.Project.PermaName</span><span>-</span><span>@Model.Task.TaskNum  Url</span>
             </div>
             <div>
                 @if (Model.Task.TaskStatus != null)
                 {
-                    <span>
+                    <span class="badge" style="background-color:@Model.Task.TaskStatus.Color; color:@Model.Task.TaskStatus.TextColor">
                         @Model.Task.TaskStatus.Name
                     </span>
                 }
@@ -60,10 +60,10 @@
                         @Model.Task.StartFrom
                     </span>
                 }
-                -
+                
                 @if (Model.Task.EndAt > DateTime.MinValue)
                 {
-                    @Model.Task.EndAt
+                   <span>- </span>@Model.Task.EndAt
                 }
 
             </div>
@@ -82,7 +82,7 @@
     <!--Jumbotron-->
     <div class="card card-body">
         <div>
-            Who Icon, @Model.Task.CreatedBy @Model.Task.Created
+            @Model.Task.CreatedBy @Model.Task.CreatedBy @Model.Task.Created
         </div>
         <div>
             @Model.Description

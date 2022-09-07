@@ -84,7 +84,7 @@ namespace clsBacklog.Models
         public string? TimeUnit { get; set; }
         public string? Mentions { get; set; }
         public string? Files { get; set; }
-        public string? CreatedBy { get; set; }
+        public ProjectMemberViewModel? CreatedBy { get; set; }
         public DateTime Created { get; set; }
         public DateTime Modified { get; set; }
 

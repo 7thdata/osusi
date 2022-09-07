@@ -116,7 +116,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             DateTime due, int planTime)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-
+         
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
@@ -138,14 +138,15 @@ namespace wppBacklog.Areas.Usr.Controllers
                 return NotFound();
             }
 
+            var currentMember = _projectServices.GetProjectMemberViewByUid(organization.Id, project.Id, currentUser.Id);
+
             // Make sure you are in this.
-            var member = _projectServices.GetProjectMembersView(organizationId, projectId, currentUser.Id, "", 1, 1);
-            if (member.TotalItems == 0)
+            if (currentMember==null)
             {
                 return NotFound();
             }
 
-            var task = await _taskServices.CreateTaskAsync(new TaskModel(projectId, id, taskName, taskType, currentUser.Id)
+            var task = await _taskServices.CreateTaskAsync(new TaskModel(projectId, id, taskName, taskType, currentMember.Id)
             {
                 StartFrom = start,
                 EndAt = due,

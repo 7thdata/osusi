@@ -107,7 +107,13 @@ namespace clsBacklog.Services
                             TaskStatus = string.IsNullOrEmpty(p.Status) ? null : (from s in _db.TaskStatus where s.Id == p.Status select s).FirstOrDefault(),
                             EndAt = p.EndAt,
                             ExpectedTime = p.ExpectedTime,
-                            CreatedBy = p.CreatedBy,
+                            CreatedBy = (from a in _db.ProjectMembers
+                                         join u in _db.Users on a.UserId equals u.Id
+                                         where a.Id == p.CreatedBy
+                                         select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
+                                         {
+                                             Created = a.Created
+                                         }).FirstOrDefault(),
                             Description = p.Description,
                             Priority = p.Priority,
                             StartFrom = p.StartFrom,
@@ -206,7 +212,13 @@ namespace clsBacklog.Services
                                               }).FirstOrDefault(),
                             EndAt = p.EndAt,
                             ExpectedTime = p.ExpectedTime,
-                            CreatedBy = p.CreatedBy,
+                            CreatedBy = (from a in _db.ProjectMembers
+                                         join u in _db.Users on a.UserId equals u.Id
+                                         where a.Id == p.CreatedBy
+                                         select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
+                                         {
+                                             Created = a.Created
+                                         }).FirstOrDefault(),
                             TaskStatusId = p.Status,
                             TaskStatus = string.IsNullOrEmpty(p.Status) ? null : (from s in _db.TaskStatus where s.Id == p.Status select s).FirstOrDefault(),
                             Description = p.Description,
