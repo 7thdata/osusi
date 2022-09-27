@@ -182,6 +182,71 @@ namespace clsBacklog.Services
                 OwnerId = userId
             });
 
+            // Create default items
+            // Type = Tasks, Bugs
+            _db.TaskTypes.AddRange(new List<TaskTypeModel>()
+            {
+                new TaskTypeModel(project.Id, Guid.NewGuid().ToString(), "Tasks", 0, "#00FFFF", "#000")
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            },
+                new TaskTypeModel(project.Id, Guid.NewGuid().ToString(), "Bugs", 0, "#FF0000", "#fff")
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            }
+
+            });
+
+            // Status = New, In Process, Done
+            _db.TaskStatus.AddRange(new List<TaskStatusModel>()
+            {
+                new TaskStatusModel(project.Id, Guid.NewGuid().ToString(), "New", 0, "#FFFF00", "#000")
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            },
+                new TaskStatusModel(project.Id, Guid.NewGuid().ToString(), "In Process", 0, "#FF00FF", "#000")
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            },
+                new TaskStatusModel(project.Id, Guid.NewGuid().ToString(), "Completed", 0, "#008000", "#fff")
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            }
+            });
+
+            // Completion Reason = Completed, Duplicate, Voided 
+            _db.TaskCompletionReasons.AddRange(new List<TaskCompletionReasonModel>()
+            {
+                new TaskCompletionReasonModel(project.Id, Guid.NewGuid().ToString(), "New", 0)
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            },
+                new TaskCompletionReasonModel(project.Id, Guid.NewGuid().ToString(), "In Process", 0)
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            },
+                new TaskCompletionReasonModel(project.Id, Guid.NewGuid().ToString(), "Completed", 0)
+            {
+                Created = DateTime.Now,
+                DisplayOrder = 0,
+                OwnerId = project.OwnerId,
+            }
+            });
+
             await _db.SaveChangesAsync();
 
             return project;
