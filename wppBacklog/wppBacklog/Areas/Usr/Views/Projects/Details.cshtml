@@ -1,0 +1,842 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrProjectDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.User?.OrganizationId;
+    ViewData["ProjectId"] = Model.User?.ProjectId;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/usr" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-house-chimney fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/settings" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-gear fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/organizations" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-building fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/organization/@Model.Organization.Id" class="text-dark text-decoration-none">
+                        @Model.Organization.Name
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/projects" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-sushi fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+    @if (Model.RCode == 200)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @Model.Project.Name has been created.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 201)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @Model.Project.Name has been set to "active".
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 210)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            Status has been created.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 220)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            Status has been updated.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (Model.RCode == 230)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            Status has been deleted.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex my-2 justify-content-between">
+        <div class="font-xl">
+            @Model.Organization.Name / @Model.Project.Name
+        </div>
+        <div>
+            @if (!Model.IsActiveProject)
+            {
+                <form method="post" action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/active">
+                    @Html.AntiForgeryToken()
+                    <button class="btn btn-success rounded-0" type="submit">
+                        <i class="fa-light fa-lightbulb-on fa-fw"></i>
+                    </button>
+                </form>
+            }
+            else
+            {
+                <button class="btn btn-success rounded-0" type="button">
+                    <i class="fa-light fa-lightbulb fa-fw"></i>
+                </button>
+            }
+
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#editDescriptionModal">
+                            <i class="fa-light fa-file-pen fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+                <table class="table">
+                    <tr>
+                        <td>
+                            Id
+                        </td>
+                        <td>
+                            @Model.Project.PermaName
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            Description
+                        </td>
+                        <td>
+                            @Model.Project.Description
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Display Order
+                        </td>
+                        <td>
+                            @Model.Project.DisplayOrder
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Created
+                        </td>
+                        <td>
+                            @Model.Project.Created
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Types
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#typeModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ListOfTypes != null)
+                {
+                    foreach (var type in Model.ListOfTypes)
+                    {
+                        <div class="card card-body bg-transparent my-2">
+                            <div class="d-flex">
+                                <div style="width:20px;" class="text-end">
+                                    @type.DisplayOrder
+                                </div>
+                                <div class="mx-2 p-2 w-100" style="background-color:@type.Color;">
+                                    <a class="list-group-item list-group-item-action bg-transparent" style="color:@type.TextColor"
+                               onClick="mapTypeValue('@type.Name','@type.Id','@type.Name','@type.Color','@type.TextColor','@type.DisplayOrder')">
+                                        @type.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Status
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#statusModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ListOfStatus != null)
+                {
+                    foreach (var status in Model.ListOfStatus)
+                    {
+                        <div class="card card-body bg-transparent my-2">
+                            <div class="d-flex">
+                                <div style="width:20px;" class="text-end">
+                                    @status.DisplayOrder
+                                </div>
+                                <div class="mx-2 p-2 w-100" style="background-color:@status.Color;">
+                                    <a style="color:@status.TextColor"
+                               onClick="mapStatusValue('@status.Name','@status.Id','@status.Name','@status.Color','@status.TextColor', '@status.DisplayOrder')">
+                                        @status.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+            </div>
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Categories
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#categoryModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ListOfCategories != null)
+                {
+                    foreach (var category in Model.ListOfCategories)
+                    {
+                        <div class="card card-body bg-transparent my-2">
+                            <div class="d-flex">
+                                <div style="width:20px;" class="text-end">
+                                    @category.DisplayOrder
+                                </div>
+                                <div class="mx-2 p-2 w-100">
+                                    <a onClick="mapCategoryValue('@category.Name','@category.Id','@category.Name','@category.DisplayOrder')">
+                                        @category.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Milestones
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#mileStoneModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ListOfMileStones != null)
+                {
+                    foreach (var milestone in Model.ListOfMileStones)
+                    {
+                        <div class="card card-body bg-transparent my-2">
+                            <div class="d-flex">
+                                <div style="width:20px;" class="text-end">
+                                    @milestone.DisplayOrder
+                                </div>
+                                <div class="mx-2 p-2 w-100">
+                                    <a onClick="mapMilestoneValue('@milestone.Name','@milestone.Id','@milestone.Name','@milestone.DisplayOrder')">
+                                        @milestone.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Versions
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#versionModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ListOfVersions != null)
+                {
+                    foreach (var version in Model.ListOfVersions)
+                    {
+                        <div class="card card-body bg-transparent my-2">
+                            <div class="d-flex">
+                                <div style="width:20px;" class="text-end">
+                                    @version.DisplayOrder
+                                </div>
+                                <div class="mx-2 p-2 w-100">
+                                    <a onClick="mapVersionValue('@version.Name','@version.Id','@version.Name','@version.DisplayOrder')">
+                                        @version.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Completion Reason
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#completionReasonModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ListOfTaskCompletionReasons != null)
+                {
+                    foreach (var reason in Model.ListOfTaskCompletionReasons)
+                    {
+                        <div class="card card-body bg-transparent my-2">
+                            <div class="d-flex">
+                                <div style="width:20px;" class="text-end">
+                                    @reason.DisplayOrder
+                                </div>
+                                <div class="mx-2 p-2 w-100">
+                                    <a onClick="mapReasonValue('@reason.Name','@reason.Id','@reason.Name','@reason.DisplayOrder')">
+                                        @reason.Name
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-body bg-transparent my-2">
+                <div class="d-flex justify-content-between">
+                    <div class="font-lg">
+                        Project Members
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary btn-sm rounded-0" data-bs-toggle="modal" data-bs-target="#memberModal"><i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+                </div>
+                <hr />
+                @if (Model.ProjectMembers != null)
+                {
+                    <div>
+                        @if (Model.ProjectMembers.Items != null)
+                        {
+                            <table class="table">
+                                @foreach (var member in Model.ProjectMembers.Items)
+                                {
+                                    <tr>
+                                        <td>
+                                            @member.User?.Name
+                                        </td>
+                                        <td>
+                                            @member.User?.Email
+                                        </td>
+                                        <td>
+                                            @if (member.MembershipType == "admin")
+                                            {
+                                                <div>
+                                                    Admin
+                                                </div>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="py-4 text-center">
+                                No members.
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Status -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusTitleLabel">Add New Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/status/upsert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="statusId" value="" name="id" />
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" id="statusName" class="form-control" name="name" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Color</label>
+                        <input type="text" id="statusColor" class="form-control" name="color" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Text Color</label>
+                        <input type="text" id="statusTextColor" class="form-control" name="textColor" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Display Order</label>
+                        <input type="number" id="statusDisplayOrder" class="form-control" name="displayOrder" />
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary rounded-0" type="submit">
+                            <i class="fa-light fa-upload fa-fw"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr />
+
+                <table class="table table-bordered border-none">
+                    <tr>
+                        <td style="background-color:#C0C0C0" class="font-sm">
+                            Silver #C0C0C0
+                        </td>
+                        <td style="background-color:#FF0000" class="font-sm">
+                            Red #FF0000
+                        </td>
+                        <td style="background-color:#800000" class="font-sm">
+                            Maroon #800000
+                        </td>
+                        <td style="background-color:#FFFF00" class="font-sm">
+                            Yellow #FFFF00
+                        </td>
+                        <td style="background-color:#808000" class="font-sm">
+                            Olive #808000
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#00FF00" class="font-sm">
+                            Lime #00FF00
+                        </td>
+                        <td style="background-color:#008000" class="font-sm">
+                            Green #008000
+                        </td>
+                        <td style="background-color:#00FFFF" class="font-sm">
+                            Aqua #00FFFF
+                        </td>
+                        <td style="background-color:#008080" class="font-sm">
+                            Teal #008080
+                        </td>
+                        <td style="background-color:#0000FF" class="font-sm">
+                            Blue #0000FF
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#000080" class="font-sm">
+                            Navy #000080
+                        </td>
+
+                        <td style="background-color:#FF00FF" class="font-sm">
+                            Fuchsia #FF00FF
+                        </td>
+
+                        <td style="background-color:#800080" class="font-sm">
+                            Purple #800080
+                        </td>
+                    </tr>
+                </table>
+
+                <hr />
+                <form id="deleteStatusForm" class="text-end" action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/status/delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="statusDeleteId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <button class="btn btn-danger rounded-0" type="submit">
+                            <i class="fa-light fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Type -->
+<div class="modal fade" id="typeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="typeTitleLabel">Add New Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/type/upsert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="typeId" value="" name="id" />
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" id="typeName" class="form-control" name="name" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Color</label>
+                        <input type="text" id="typeColor" class="form-control" name="color" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Text Color</label>
+                        <input type="text" id="typeTextColor" class="form-control" name="textColor" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Display Order</label>
+                        <input type="number" id="typeDisplayOrder" class="form-control" name="displayOrder" />
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary rounded-0" type="submit">
+                            <i class="fa-light fa-upload fa-fw"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr />
+                <table class="table table-bordered border-none">
+                    <tr>
+                        <td style="background-color:#C0C0C0" class="font-sm">
+                            Silver #C0C0C0
+                        </td>
+                        <td style="background-color:#FF0000" class="font-sm">
+                            Red #FF0000
+                        </td>
+                        <td style="background-color:#800000" class="font-sm">
+                            Maroon #800000
+                        </td>
+                        <td style="background-color:#FFFF00" class="font-sm">
+                            Yellow #FFFF00
+                        </td>
+                        <td style="background-color:#808000" class="font-sm">
+                            Olive #808000
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#00FF00" class="font-sm">
+                            Lime #00FF00
+                        </td>
+                        <td style="background-color:#008000" class="font-sm">
+                            Green #008000
+                        </td>
+                        <td style="background-color:#00FFFF" class="font-sm">
+                            Aqua #00FFFF
+                        </td>
+                        <td style="background-color:#008080" class="font-sm">
+                            Teal #008080
+                        </td>
+                        <td style="background-color:#0000FF" class="font-sm">
+                            Blue #0000FF
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background-color:#000080" class="font-sm">
+                            Navy #000080
+                        </td>
+
+                        <td style="background-color:#FF00FF" class="font-sm">
+                            Fuchsia #FF00FF
+                        </td>
+
+                        <td style="background-color:#800080" class="font-sm">
+                            Purple #800080
+                        </td>
+                    </tr>
+                </table>
+
+                <hr />
+                <form id="deleteTypeForm" action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/type/delete" method="post" class="text-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="typeDeleteId" value="" name="id" />
+                    <div class="mb-3">
+                        <button class="btn btn-danger rounded-0" type="submit">
+                            <i class="fa-light fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Category -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryTitleLabel">Add New Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/category/upsert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="categoryId" value="" name="id" />
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" id="categoryName" class="form-control" name="name" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Display Order</label>
+                        <input type="number" id="categoryDisplayOrder" class="form-control" name="displayOrder" />
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary rounded-0" type="submit">
+                            <i class="fa-light fa-upload fa-fw"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr />
+                <form id="deleteTypeForm" action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/category/delete" method="post" class="text-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="typeDeleteId" value="" name="id" />
+                    <div class="mb-3">
+                        <button class="btn btn-danger rounded-0" type="submit">
+                            <i class="fa-light fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Milestone -->
+<div class="modal fade" id="mileStoneModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="milestoneTitleLabel">Add New Milestone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/milestone/upsert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="milestoneId" value="" name="id" />
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" id="milestoneName" class="form-control" name="name" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Display Order</label>
+                        <input type="number" id="milestoneDisplayOrder" class="form-control" name="displayOrder" />
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary rounded-0" type="submit">
+                            <i class="fa-light fa-upload fa-fw"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr />
+                <form id="deleteTypeForm" action="/@Model.Culture/project/milestone/delete" method="post" class="text-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="milestoneDeleteId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <button class="btn btn-danger rounded-0" type="submit">
+                            <i class="fa-light fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Version -->
+<div class="modal fade" id="versionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="versionTitleLabel">Add New Version</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/version/upsert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="versionId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" id="versionName" class="form-control" name="name" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Display Order</label>
+                        <input type="number" id="versionDisplayOrder" class="form-control" name="displayOrder" />
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary rounded-0" type="submit">
+                            <i class="fa-light fa-upload fa-fw"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr />
+                <form id="deleteTypeForm" action="/@Model.Culture/version/milestone/delete" method="post" class="text-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="versionDeleteId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <button class="btn btn-danger rounded-0" type="submit">
+                            <i class="fa-light fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Completion Reason -->
+<div class="modal fade" id="completionReasonModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completionReasonTitleLabel">Add New Completion Reason</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/completionReason/upsert" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="completionReasonId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" id="completionReasonName" class="form-control" name="name" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Display Order</label>
+                        <input type="number" id="completionReasonDisplayOrder" class="form-control" name="displayOrder" />
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary rounded-0" type="submit">
+                            <i class="fa-light fa-upload fa-fw"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr />
+                <form id="deleteTypeForm" action="/@Model.Culture/version/milestone/delete" method="post" class="text-end">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="versionDeleteId" value="" name="id" />
+                    <input type="hidden" value="@Model.Project.Id" name="projectId" />
+                    <div class="mb-3">
+                        <button class="btn btn-danger rounded-0" type="submit">
+                            <i class="fa-light fa-trash-can"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Member -->
+<div class="modal fade" id="memberModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="memberTitleLabel">Add New Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+<script>
+
+    function mapStatusValue(title, id, name, color, textColor, displayOrder) {
+        $("#statusTitleLabel").text(title)
+        $("#statusId").val(id);
+        $("#statusName").val(name);
+        $("#statusColor").val(color);
+        $("#statusTextColor").val(textColor);
+        $("#statusDisplayOrder").val(displayOrder);
+        $("#statusDeleteId").val(id);
+
+        /* Modal */
+        const myModal = new bootstrap.Modal('#statusModal');
+        myModal.toggle();
+    }
+
+    function mapTypeValue(title, id, name, color, textColor, displayOrder) {
+        $("#typeTitleLabel").text(title)
+        $("#typeId").val(id);
+        $("#typeName").val(name);
+        $("#typeColor").val(color);
+        $("#typeTextColor").val(textColor);
+        $("#typeDisplayOrder").val(displayOrder);
+        $("#typeDeleteId").val(id);
+
+        /* Modal */
+        const myModal = new bootstrap.Modal('#typeModal');
+        myModal.toggle();
+    }
+
+    function mapCategoryValue(title, id, name, displayOrder) {
+        $("#categoryTitleLabel").text(title)
+        $("#categoryId").val(id);
+        $("#categoryName").val(name);
+        $("#categoryDisplayOrder").val(displayOrder);
+        $("#categoryDeleteId").val(id);
+
+        /* Modal */
+        const myModal = new bootstrap.Modal('#categoryModal');
+        myModal.toggle();
+    }
+
+    function mapMilestoneValue(title, id, name, displayOrder) {
+        $("#milestoneTitleLabel").text(title)
+        $("#milestoneId").val(id);
+        $("#milestoneName").val(name);
+        $("#milestoneDisplayOrder").val(displayOrder);
+        $("#milestoneDeleteId").val(id);
+
+        /* Modal */
+        const myModal = new bootstrap.Modal('#milestoneModal');
+        myModal.toggle();
+    }
+
+    function mapVersionValue(title, id, name, displayOrder) {
+        $("#versionTitleLabel").text(title)
+        $("#versionId").val(id);
+        $("#versionName").val(name);
+        $("#versionDisplayOrder").val(displayOrder);
+        $("#versionDeleteId").val(id);
+
+        /* Modal */
+        const myModal = new bootstrap.Modal('#versionModal');
+        myModal.toggle();
+    }
+
+</script>
+    }

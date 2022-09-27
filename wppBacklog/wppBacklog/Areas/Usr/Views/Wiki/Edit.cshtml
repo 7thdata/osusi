@@ -1,0 +1,47 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrWikiEditViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.Organization.Id;
+    ViewData["ProjectId"] = Model.Project.Id;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/organization/@Model.Organization.Id" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-building fa-fw"></i> @Model.Organization.Name
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <i class="fa-light fa-sushi fa-fw"></i> <a href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id" class="text-dark text-decoration-none">@Model.Project.Name</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/usr" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-house-chimney fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <form method="post" action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/wiki/upsert">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" value="@Model.Wiki.Id" />
+            <input type="hidden" name="ParentWikiId" value="@Model.Wiki.ParentWikiId" />
+            <div class="mb-3">
+                <input type="text" class="form-control" name="Name" value="@Model.Wiki.Name" />
+            </div>
+            <div class="mb-3">
+                <textarea name="Description" class="form-control" rows="20">@Model.Wiki.Description</textarea>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-primary rounded-0" type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>

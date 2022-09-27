@@ -1,0 +1,59 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrHomeSettingsViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.User?.OrganizationId;
+    ViewData["ProjectId"] = Model.User?.ProjectId;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/@Model.Culture/usr" class="text-dark text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+
+            <div class="card my-2 bg-transparent">
+                <div class="card-header">
+                    Me
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="/@Model.Culture/Me" class="list-group-item list-group-item-action bg-transparent">My Profile</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-transparent">Change Email Address</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-transparent">Change Phone Number</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-transparent">Change Password</a>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-md-3">
+            <div class="card my-2 bg-transparent">
+                <div class="card-header">
+                    My Org.
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="/@Model.Culture/organizations" class="list-group-item list-group-item-action bg-transparent">My Org.</a>
+                    <a href="#" class="list-group-item list-group-item-action bg-transparent">Subscription</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card my-2 bg-transparent">
+                <div class="card-header">
+                    Projects
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="/@Model.Culture/projects" class="list-group-item list-group-item-action bg-transparent">Projects</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</div>

@@ -1,0 +1,313 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrTaskIndexViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.Organization.Id;
+    ViewData["ProjectId"] = Model.Project.Id;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/organization/@Model.Organization.Id" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-building fa-fw"></i> @Model.Organization.Name
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <i class="fa-light fa-sushi fa-fw"></i> <a href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id" class="text-dark text-decoration-none">@Model.Project.Name</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/usr" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-house-chimney fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fa-light fa-list-check fa-fw"></i>
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+
+    <form method="get" class="">
+        <lable>Keyword</lable>
+        <input type="text" name="keyword" class="form-control" />
+
+        <div class="row">
+            <div class="col-md-4 my-2">
+                <lable>Status</lable>
+                <select class="form-select" name="filterTaskStatus">
+                    <option value="">Any</option>
+                    @foreach (var taskStatus in Model.TaskStatuses)
+                    {
+                        <option value="@taskStatus.Id">
+                            @taskStatus.Name
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4 my-2">
+            </div>
+            <div class="col-md-4 my-2">
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-secondary" type="submit"><i class="fa-light fa-magnifying-glass fa-fw"></i></button>
+        </div>
+    </form>
+
+    <div class="text-end">
+        <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+            <i class="fa-light fa-plus fa-fw"></i>
+        </button>
+    </div>
+    <div class="table-responsive">
+        @if (Model.Tasks.Items != null)
+        {
+            <table class="table">
+                <tr>
+                    <td>
+                        Type
+                    </td>
+                    <td>
+                        Id,Name
+                    </td>
+                    <td>
+                        Assined To
+                    </td>
+                    <td>
+                        Status
+                    </td>
+                    <td>
+                        Priority
+                    </td>
+                    <td>
+                        Category
+                    </td>
+                    <td>
+                        Created
+                    </td>
+                    <td>
+                        Modified
+                    </td>
+                    <td>
+                        Start From
+                    </td>
+                    <td>
+                        Due
+                    </td>
+                    <td>
+                        Created By
+                    </td>
+                </tr>
+                @foreach (var task in Model.Tasks.Items)
+                {
+                    <tr>
+                        <td>
+                            <div class="p-1 rounded" style="background-color:@task.TaskType.Color; color:@task.TaskType.TextColor">
+                                @task.TaskType.Name
+                            </div>
+                        </td>
+                        <td>
+                            <div class="">
+                                <span class="badge text-bg-secondary">
+                                    @task.Project.PermaName<span>-</span>@task.TaskNum
+                                </span>
+                            </div>
+                            <div>
+                                <a class="" href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@task.Id">
+                                    @task.Name
+                                </a>
+                            </div>
+                        </td>
+
+                        <td>
+                            <img src="@task.AssignedPerson?.User?.ProfileImage" style="width:30px;" class="rounded" />
+                        </td>
+                        <td>
+                            @if (task.TaskStatus != null)
+                            {
+                                <div class="p-1 rounded" style="background-color:@task.TaskStatus?.Color; color:@task.TaskStatus?.TextColor">
+                                    @task.TaskStatus?.Name
+                                </div>
+                            }
+
+                        </td>
+                        <td>
+                            @task.Priority
+                        </td>
+                        <td>
+                            @task.TaskCategory
+                        </td>
+                        <td>
+                            @if (task.Created > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.Created.ToString("yyyy-MM-dd")
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @if (task.Modified > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.Modified.ToString("yyyy-MM-dd")
+                                </span>
+                            }
+
+                        </td>
+                        <td>
+                            @if (task.StartFrom > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.StartFrom?.ToString("yyyy-MM-dd")
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @if (task.EndAt > DateTime.MinValue)
+                            {
+                                <span>
+                                    @task.EndAt?.ToString("yyyy-MM-dd")
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            <img src="@task.CreatedBy?.User?.ProfileImage" style="width:30px;" class="rounded" />
+                        </td>
+                    </tr>
+                }
+            </table>
+        }
+    </div>
+
+    <!-- Button trigger modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="newTaskModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/upsert" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Type
+                            </lable>
+                            <select class="form-select" name="taskType">
+                                @foreach (var type in Model.TaskTypes)
+                                {
+                                    <option value="@type.Id">
+                                        @type.Name
+                                    </option>
+                                }
+                            </select>
+
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Name
+                            </lable>
+                            <input type="text" name="taskName" value="" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Description
+                            </lable>
+                            <textarea class="form-control" name="taskDescription" rows="10"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 my-2">
+                                <label>Status</label>
+                                <select class="form-select" name="taskStatus">
+                                    <option value="">Select status.</option>
+                                    @foreach (var taskStatus in Model.TaskStatuses)
+                                    {
+                                        <option value="@taskStatus.Id">
+                                            @taskStatus.Name
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Assign</label>
+
+                                <select class="form-select" name="assignPerson">
+                                    <option value="">Select assign person.</option>
+                                    @foreach (var member in Model.AssignableMembers)
+                                    {
+                                        <option value="@member.Id">@member.User?.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Priority</label>
+                                <select class="form-select" name="taskPriority">
+                                    <option value="">Select priority.</option>
+                                    <option value="1">High</option>
+                                    <option value="2">Normal</option>
+                                    <option value="3">Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Milestone</label>
+                                <select class="form-select" name="taskMilestone">
+                                    <option value="">Select milestone.</option>
+                                    @foreach (var milestone in Model.TaskMilestones)
+                                    {
+                                        <option value="@milestone.Id">@milestone.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Category</label>
+                                <select class="form-select" name="taskCategory">
+                                    <option value="">Select category.</option>
+                                    @foreach (var category in Model.TaskCategories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Version</label>
+                                <select class="form-select" name="taskMilestone">
+                                    <option value="">Select version.</option>
+                                    @foreach (var version in Model.TaskVersions)
+                                    {
+                                        <option value="@version.Id">@version.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Start</label>
+                                <input type="date" class="form-control" name="start" />
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Due</label>
+                                <input type="date" class="form-control" name="due" />
+                            </div>
+                            <div class="col-md-6 my-2">
+                                <label>Plan Time</label>
+                                <input type="number" class="form-control" name="planTime" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button class="btn btn-primary rounded-0" type="submit">
+                                Save
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

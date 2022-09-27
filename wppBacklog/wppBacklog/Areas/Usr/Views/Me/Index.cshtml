@@ -1,0 +1,60 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrMeIndexViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.User?.OrganizationId;
+    ViewData["ProjectId"] = Model.User?.ProjectId;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/@Model.Culture/usr" class="text-dark text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+        </div>
+        <div class="col-md-6">
+            <div>
+                <div class="">
+                    <img src="@Model.User?.ProfileImageUrl" class="rounded" />
+                </div>
+
+                <form action="/@Model.Culture/me/upload-profile-image" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex">
+                        <div class="py-2">
+                            <input class="form-control form-control-sm" type="file" name="images" multiple="multiple">
+                        </div>
+                        <div class="px-2">
+                        </div>
+                        <div class="py-2">
+                            <button class="btn btn-primary btn-sm rounded-0" type="submit">
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <form action="/@Model.Culture/me/update" method="post">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <lable>
+                        Name
+                    </lable>
+                    <input type="text" name="name" class="form-control" value="@Model.User.Name" />
+                </div>
+                <button class="btn btn-primary btn-sm rounded-0" type="submit">
+                    Save
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

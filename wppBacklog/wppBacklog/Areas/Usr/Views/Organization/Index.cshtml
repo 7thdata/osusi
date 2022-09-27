@@ -1,0 +1,96 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrOrganizationIndexViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.User?.OrganizationId;
+    ViewData["ProjectId"] = Model.User?.ProjectId;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/usr" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-house-chimney fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/settings" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-gear fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+            </ol>
+        </nav>
+    </div>
+
+    @if (Model.RCode == 230)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            You have left the organization.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <div class="d-flex justify-content-between">
+        <div>
+            <form method="get">
+                <div class="input-group">
+                    <input type="text" name="keyword" class="form-control" />
+                    <button class="btn btn-secondary" type="submit"><i class="fa-light fa-magnifying-glass fa-fw"></i></button>
+                </div>
+            </form>
+        </div>
+        <div>
+            <button class="btn btn-secondary rounded-0" data-bs-toggle="modal" data-bs-target="#newOrganizationModal">
+                <i class="fa-light fa-plus fa-fw"></i>
+            </button>
+        </div>
+    </div>
+
+    <div>
+        @if (Model.Organizations.Items != null)
+        {
+            @foreach (var organization in Model.Organizations.Items)
+            {
+                <div class="card card-body my-2 bg-transparent">
+                    <div>
+                        <a href="/@Model.Culture/organization/@organization.Organization.Id" class="text-decoration-none text-dark stretched-link">
+                            @organization.Organization.Name
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Button trigger modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="newOrganizationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Organization</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/@Model.Culture/organization/create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <lable class="form-label">
+                                Name
+                            </lable>
+                            <input type="text" name="name" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <button class="btn btn-primary rounded-0" type="submit">
+                                <i class="fa-light fa-upload fa-fw"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

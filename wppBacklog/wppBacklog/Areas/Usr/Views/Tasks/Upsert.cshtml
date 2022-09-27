@@ -1,0 +1,37 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrTaskUpsertViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+    <div class="bg-light-color rounded p-2 mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/organization/@Model.Organization.Id" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-building fa-fw"></i> @Model.Organization.Name
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <i class="fa-light fa-sushi fa-fw"></i> <a href="/@Model.Culture/project/@Model.Project.Id" class="text-dark text-decoration-none">@Model.Project.Name</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/@Model.Culture/usr" class="text-dark text-decoration-none">
+                        <i class="fa-light fa-house-chimney fa-fw"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fa-light fa-list-check fa-fw"></i>
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+
+    <div class="p-5 text-center">
+       The task has been added.  Go to <a href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/task/@Model.Task.Id">the task</a> 
+       or <a href="/@Model.Culture/organization/@Model.Organization.Id/project/@Model.Project.Id/tasks">create more</a>.
+    </div>
+
+</div>

@@ -1,0 +1,66 @@
+.logo {
+    font-family: 'Berkshire Swash', cursive;
+}
+
+main{
+    margin-top:55px;
+}
+
+/* Text */
+h1 {
+    font-weight: 600;
+    font-size: 1.8em;
+}
+
+h2 {
+    font-weight: 600;
+    font-size: 1.4em;
+}
+
+h3 {
+    font-weight: 600;
+    font-size: 1.2em;
+}
+
+
+hr{
+    border-top:solid 1px #000;
+}
+
+.font-xl {
+    font-size: 1.8em;
+}
+
+.font-lg {
+    font-size: 1.2em;
+}
+
+.font-sm {
+    font-size: .8em;
+}
+
+.font-xs {
+    font-size: .6em;
+}
+
+
+/* Bg Color */
+.bg-main-color {
+    background-color: #C2A15F
+}
+
+.bg-secondary-color {
+    background-color: #54BAB9
+}
+
+.bg-high-color {
+    background-color: #9ED2C6
+}
+
+.bg-light-color {
+    background-color: #E9DAC1
+}
+
+.bg-ligher-color {
+    background-color: #F7ECDE
+}
