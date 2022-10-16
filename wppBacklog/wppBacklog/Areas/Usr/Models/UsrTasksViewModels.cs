@@ -12,7 +12,7 @@ namespace wppBacklog.Areas.Usr.Models
         public UsrTaskIndexViewModel(ProjectModel project, OrganizationModel organization,
             PaginationModel<TaskViewModel> tasks, IList<ProjectMemberViewModel> assignableMembers,
             IList<TaskTypeModel> taskTypes, IList<TaskStatusModel> taskStatuses, IList<TaskCategoryModel> taskCategories,
-            IList<TaskMilestoneModel> taskMilestones, IList<TaskVersionModel> taskVersions)
+            IList<TaskMilestoneModel> taskMilestones, IList<TaskVersionModel> taskVersions, UsersSavedSearch usersSavedSearch)
         {
             Tasks = tasks;
             Project = project;
@@ -23,6 +23,7 @@ namespace wppBacklog.Areas.Usr.Models
             TaskCategories = taskCategories;
             TaskMilestones = taskMilestones;
             TaskVersions = taskVersions;
+            UsersSavedSearch = usersSavedSearch;
         }
 
         public OrganizationModel Organization { get; set; }
@@ -35,6 +36,9 @@ namespace wppBacklog.Areas.Usr.Models
         public IList<TaskCategoryModel> TaskCategories { get; set; }
         public IList<TaskMilestoneModel> TaskMilestones { get; set; }
         public IList<TaskVersionModel> TaskVersions { get; set; }
+        public UsersSavedSearch UsersSavedSearch { get; set; }
+        public DateTime DefaultStartTime { get; set; }
+        public DateTime DefaultEndTime { get; set; }
     }
 
     public class UsrTaskUpsertViewModel : ViewBaseModel

@@ -34,18 +34,42 @@
 
     <form method="get" class="">
         <lable>Keyword</lable>
-        <input type="text" name="keyword" class="form-control" />
+        <input type="text" name="keyword" class="form-control" value="@Model.Tasks.Keyword" />
 
         <div class="row">
             <div class="col-md-4 my-2">
                 <lable>Status</lable>
                 <select class="form-select" name="filterTaskStatus">
-                    <option value="">Any</option>
+                    @if (string.IsNullOrEmpty(Model.UsersSavedSearch.TaskStatus))
+                    {
+                        <option value="any" selected>Any</option>
+                    }
+                    else
+                    {
+                        if(Model.UsersSavedSearch.TaskStatus == "any")
+                        {
+                             <option value="any" selected>Any</option>
+                        }
+                        else
+                        {
+                             <option value="any">Any</option>
+                        }
+                    }
+
                     @foreach (var taskStatus in Model.TaskStatuses)
                     {
-                        <option value="@taskStatus.Id">
-                            @taskStatus.Name
-                        </option>
+                        if (taskStatus.Id == Model.UsersSavedSearch.TaskStatus)
+                        {
+                            <option value="@taskStatus.Id" selected>
+                                @taskStatus.Name
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@taskStatus.Id">
+                                @taskStatus.Name
+                            </option>
+                        }
                     }
                 </select>
             </div>
@@ -125,7 +149,7 @@
                         </td>
 
                         <td>
-                            <img src="@task.AssignedPerson?.User?.ProfileImage" style="width:30px;" class="rounded" />
+                            <img src="@task.AssignedPerson?.User?.ProfileImage" style="width:30px;" class="rounded" /> @task.AssignedPerson?.User?.Name
                         </td>
                         <td>
                             @if (task.TaskStatus != null)
@@ -176,7 +200,7 @@
                             }
                         </td>
                         <td>
-                            <img src="@task.CreatedBy?.User?.ProfileImage" style="width:30px;" class="rounded" />
+                            <img src="@task.CreatedBy?.User?.ProfileImage" style="width:30px;" class="rounded" /> @task.CreatedBy?.User?.Name
                         </td>
                     </tr>
                 }
@@ -288,15 +312,15 @@
                             </div>
                             <div class="col-md-6 my-2">
                                 <label>Start</label>
-                                <input type="date" class="form-control" name="start" />
+                                <input type="date" class="form-control" name="start" value="@Model.DefaultStartTime.ToString("yyyy-MM-dd")" />
                             </div>
                             <div class="col-md-6 my-2">
                                 <label>Due</label>
-                                <input type="date" class="form-control" name="due" />
+                                <input type="date" class="form-control" name="due" value="@Model.DefaultEndTime.ToString("yyyy-MM-dd")"  />
                             </div>
                             <div class="col-md-6 my-2">
-                                <label>Plan Time</label>
-                                <input type="number" class="form-control" name="planTime" />
+                                <label>Plan Time (hours)</label>
+                                <input type="number" class="form-control" name="planTime" value="1" />
                             </div>
                         </div>
 

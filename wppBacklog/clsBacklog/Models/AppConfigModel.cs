@@ -1,4 +1,4 @@
-﻿namespace wppBacklog.Models
+﻿namespace clsBacklog.Models
 {
     public class AppConfigModel
     {

@@ -35,6 +35,7 @@ public class ApplicationDbContext : IdentityDbContext<UserModel>
     public DbSet<TaskMilestoneModel> TaskMilestones { get; set; }
     public DbSet<TaskVersionModel> TaskVersions { get; set; }
     public DbSet<TaskCompletionReasonModel> TaskCompletionReasons { get; set; }
+    public DbSet<UsersSavedSearch> SavedSearches { get; set; }
 
     // Wiki
     public DbSet<WikiModel> Wikis { get; set; }
