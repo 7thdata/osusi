@@ -288,9 +288,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="/@Model.Culture/organization/member/invite" method="post">
+                    <form action="/@Model.Culture/organization/@Model.Organization.Id/member/invite" method="post">
                         @Html.AntiForgeryToken()
-                        <input type="hidden" value="@Model.Organization.Id" name="organizationId" />
+                     
                         <div class="mb-3">
                             <label>Email</label>
                             <input type="email" class="form-control" name="email" />

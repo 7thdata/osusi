@@ -19,7 +19,7 @@ namespace wppBacklog.Areas.Usr.Controllers
         private readonly IOrganizationServices _organizationService;
         private readonly Random _random = new Random();
         private readonly IUserStore<UserModel> _userStore;
-        private readonly IUserEmailStore<UserModel> _emailStore;
+        private readonly IUserEmailStore<UserModel> _emailStore; 
         private readonly IOptions<AppConfigModel> _config;
         private readonly INotificationHandlers _notificationHandlers;
 
@@ -117,14 +117,14 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <returns></returns>
         [HttpPost, AutoValidateAntiforgeryToken]
         [Route("/{culture}/organization/create")]
-        public async Task<IActionResult> Create(string culture, string name)
+        public async Task<IActionResult> Create(string culture, string name, string permaName)
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
             var organizationId = Guid.NewGuid().ToString();
 
             // Create
-            var organization = await _organizationService.CreateOrganizationAsync(new OrganizationModel(organizationId, name)
+            var organization = await _organizationService.CreateOrganizationAsync(new OrganizationModel(organizationId, name, permaName)
             {
                 OwnerId = currentUser.Id
             });
@@ -238,7 +238,7 @@ namespace wppBacklog.Areas.Usr.Controllers
 
             await _userManager.UpdateAsync(currentUser);
 
-            return RedirectToAction("Details", new { @culture = culture, @id=organizationId, @rcode = 260 });
+            return RedirectToAction("Details", new { @culture = culture, @id = organizationId, @rcode = 260 });
 
         }
 
@@ -262,14 +262,16 @@ namespace wppBacklog.Areas.Usr.Controllers
             if (tUser == null)
             {
                 // Then invite to create an account.
-                var user = CreateUser();
+                var user = new UserModel(name, culture)
+                {
+                    ProfileImage = "/images/f_f_object_170_s512_f_object_170_0bg.png"
+                };
 
                 await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
 
-                user.Name = name;
                 user.OrganizationId = currentUser.OrganizationId;
-                user.PreferedLanguage = culture;
+
                 var password = RandomPassword();
 
                 var result = await _userManager.CreateAsync(user, password);
@@ -377,19 +379,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             passwordBuilder.Append(RandomString(2));
             return passwordBuilder.ToString();
         }
-        private UserModel CreateUser()
-        {
-            try
-            {
-                return Activator.CreateInstance<UserModel>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-                    $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
-        }
+
 
         /// <summary>
         /// Remove user.

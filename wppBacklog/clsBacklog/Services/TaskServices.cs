@@ -89,38 +89,38 @@ namespace clsBacklog.Services
             string taskStatusFilter,
             int currentPage, int itemsPerPage)
         {
-            var tasks = from p in _db.Tasks
-                        join t in _db.TaskTypes on p.TaskType equals t.Id
-                        join j in _db.Projects on p.ProjectId equals j.Id
-                        where p.IsDeleted == false && p.ProjectId == projectId
-                        select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t)
-                        {
-                            ActualTime = p.ActualTime,
-                            AssignedPerson = (from a in _db.ProjectMembers
-                                              join u in _db.Users on a.UserId equals u.Id
-                                              where a.Id == p.AssignedPerson
-                                              select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
-                                              {
-                                                  Created = a.Created
-                                              }).FirstOrDefault(),
-                            TaskStatusId = p.Status,
-                            TaskStatus = string.IsNullOrEmpty(p.Status) ? null : (from s in _db.TaskStatus where s.Id == p.Status select s).FirstOrDefault(),
-                            EndAt = p.EndAt,
-                            ExpectedTime = p.ExpectedTime,
-                            CreatedBy = (from a in _db.ProjectMembers
-                                         join u in _db.Users on a.UserId equals u.Id
-                                         where a.Id == p.CreatedBy
-                                         select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
-                                         {
-                                             Created = a.Created
-                                         }).FirstOrDefault(),
-                            Description = p.Description,
-                            Priority = p.Priority,
-                            StartFrom = p.StartFrom,
-                            TimeUnit = p.TimeUnit,
-                            Created = p.Created,
-                            Modified = p.Modified
-                        };
+            var tasks = (from p in _db.Tasks
+                         join t in _db.TaskTypes on p.TaskType equals t.Id
+                         join j in _db.Projects on p.ProjectId equals j.Id
+                         where p.IsDeleted == false && p.ProjectId == projectId
+                         select new TaskViewModel(j, p.Id, p.TaskNum, p.Name, t)
+                         {
+                             ActualTime = p.ActualTime,
+                             AssignedPerson = (from a in _db.ProjectMembers
+                                               join u in _db.Users on a.UserId equals u.Id
+                                               where a.Id == p.AssignedPerson
+                                               select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
+                                               {
+                                                   Created = a.Created
+                                               }).FirstOrDefault(),
+                             TaskStatusId = p.Status,
+                             TaskStatus = string.IsNullOrEmpty(p.Status) ? null : (from s in _db.TaskStatus where s.Id == p.Status select s).FirstOrDefault(),
+                             EndAt = p.EndAt,
+                             ExpectedTime = p.ExpectedTime,
+                             CreatedBy = (from a in _db.ProjectMembers
+                                          join u in _db.Users on a.UserId equals u.Id
+                                          where a.Id == p.CreatedBy
+                                          select new ProjectMemberViewModel(a.Id, a.ProjectId, u, a.MembershipType)
+                                          {
+                                              Created = a.Created
+                                          }).FirstOrDefault(),
+                             Description = p.Description,
+                             Priority = p.Priority,
+                             StartFrom = p.StartFrom,
+                             TimeUnit = p.TimeUnit,
+                             Created = p.Created,
+                             Modified = p.Modified
+                         }).AsEnumerable();
 
             if (!string.IsNullOrEmpty(keyword))
             {
@@ -128,11 +128,14 @@ namespace clsBacklog.Services
                 tasks = tasks.Where(g => g.Name.Contains(keyword) || g.Id.Contains(keyword));
             }
 
-
             if (!string.IsNullOrEmpty(taskStatusFilter))
             {
-                // Search logic here.
-                tasks = tasks.Where(g => g.TaskStatusId == taskStatusFilter);
+                // But if this is 'any then we ignore it'
+                if (taskStatusFilter != "any")
+                {
+                    // Filter this out.
+                    tasks = tasks.Where(g => g.TaskStatusId == taskStatusFilter);
+                }
             }
 
             if (!string.IsNullOrEmpty(sort))
@@ -1150,6 +1153,59 @@ namespace clsBacklog.Services
             await _db.SaveChangesAsync();
 
             return original;
+        }
+
+        /// <summary>
+        /// Upsert users search.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public async Task<UsersSavedSearch> SaveUsersSearchAsync(string projectId, string userId, string keyword, string taskStatus)
+        {
+            // Find one
+            var one = (from o in _db.SavedSearches where o.UserId == userId && o.ProjectId == projectId select o).FirstOrDefault();
+
+            if (one == null)
+            {
+                var create = new UsersSavedSearch(Guid.NewGuid().ToString(), projectId, userId)
+                {
+                    Keyword = keyword,
+                    TaskStatus = taskStatus
+                };
+
+                // Create
+                _db.SavedSearches.Add(create);
+
+                await _db.SaveChangesAsync();
+
+                return create;
+            }
+
+            one.Keyword = keyword;
+            one.TaskStatus = taskStatus;
+
+            _db.SavedSearches.Update(one);
+            await _db.SaveChangesAsync();
+
+            return one;
+        }
+
+        /// <summary>
+        /// Get users search.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public UsersSavedSearch? GetUsersSearch(string projectId, string userId)
+        {
+            // Find one
+            var one = (from o in _db.SavedSearches where o.UserId == userId && o.ProjectId == projectId select o).FirstOrDefault();
+
+            return one;
+
         }
     }
 }

@@ -37,7 +37,7 @@ namespace wppBacklog.Areas.Usr.Controllers
         /// <param name="itemsPerPage"></param>
         /// <returns></returns>
         [Route("/{culture}/organization/{organizationId}/project/{projectId}/tasks")]
-        public async Task<IActionResult> Index(string culture, string organizationId, string projectId, string keyword, string sort, 
+        public async Task<IActionResult> Index(string culture, string organizationId, string projectId, string keyword, string sort,
             string filterTaskStatus,
             int currentPage = 1, int itemsPerPage = 50)
         {
@@ -67,10 +67,30 @@ namespace wppBacklog.Areas.Usr.Controllers
             }
 
             // filters
+            var searchFields = new UsersSavedSearch(Guid.NewGuid().ToString(), projectId, currentUser.Id);
 
-            // Show tasks.
-            var tasks = _taskServices.GetTasksWithView(project.Id, keyword, sort, filterTaskStatus, currentPage, itemsPerPage);
+            // When everything is null then load search criteria
+            if (string.IsNullOrEmpty(keyword) && string.IsNullOrEmpty(filterTaskStatus))
+            {
+                searchFields = _taskServices.GetUsersSearch(projectId, currentUser.Id);
 
+                if (searchFields == null)
+                {
+                    // First time?
+                    searchFields = await _taskServices.SaveUsersSearchAsync(projectId, currentUser.Id, keyword, filterTaskStatus);
+                }
+            }
+            else
+            {
+                // Then save it
+                searchFields = await _taskServices.SaveUsersSearchAsync(projectId, currentUser.Id, keyword, filterTaskStatus);
+            }
+
+            // Get tasks.
+            var tasks = _taskServices.GetTasksWithView(project.Id, searchFields.Keyword ?? "", sort, searchFields.TaskStatus??"", currentPage, itemsPerPage);
+
+
+            // Load data.
             var assignableMembers = _projectServices.GetProjectMembersViewInList(project.OwnerId, project.Id);
             var taskCategories = _taskServices.GetCategories(project.Id);
             var taskStatuses = _taskServices.GetStatuses(project.Id);
@@ -79,10 +99,12 @@ namespace wppBacklog.Areas.Usr.Controllers
             var taskVersions = _taskServices.GetVersions(project.Id);
 
             var view = new UsrTaskIndexViewModel(project, organization, tasks, assignableMembers, taskTypes,
-                taskStatuses, taskCategories, taskMilestones, taskVersions)
+                taskStatuses, taskCategories, taskMilestones, taskVersions, searchFields)
             {
                 Title = "Tasks",
-                Culture = culture
+                Culture = culture,
+                DefaultEndTime = DateTime.Now.AddDays(3),
+                DefaultStartTime = DateTime.Now
             };
 
             return View(view);
@@ -116,7 +138,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             DateTime due, int planTime)
         {
             var currentUser = await _userManager.GetUserAsync(User);
-         
+
             if (string.IsNullOrEmpty(id))
             {
                 id = Guid.NewGuid().ToString();
@@ -141,7 +163,7 @@ namespace wppBacklog.Areas.Usr.Controllers
             var currentMember = _projectServices.GetProjectMemberViewByUid(organization.Id, project.Id, currentUser.Id);
 
             // Make sure you are in this.
-            if (currentMember==null)
+            if (currentMember == null)
             {
                 return NotFound();
             }
@@ -165,6 +187,9 @@ namespace wppBacklog.Areas.Usr.Controllers
             {
                 return BadRequest();
             }
+
+            // Send notification if assigned.
+
 
             var view = new UsrTaskUpsertViewModel(project, organization, task)
             {

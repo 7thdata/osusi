@@ -177,13 +177,13 @@ namespace wppBacklog.Controllers
                 return BadRequest();
             }
 
-            var user = CreateUser();
+            var user = new UserModel(name, culture)
+            {
+                ProfileImage = "/images/f_f_object_170_s512_f_object_170_0bg.png"
+            };
 
             await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
-
-            user.Name = name;
-            user.PreferedLanguage = culture;
 
             var result = await _userManager.CreateAsync(user, password);
 
@@ -201,11 +201,11 @@ namespace wppBacklog.Controllers
 
                 if (culture == "ja")
                 {
-                    title = "[BB7] Backlog by SEVENTHの仮登録ありがとうございます";
+                    title = "[OSU] OSUSHI.APP仮登録ありがとうございます";
                 }
                 else
                 {
-                    title = "[BB7] Thank you for registering at Backlog by SEVENTH";
+                    title = "[OSU] Thank you for registering for OSUSHI.APP";
                 }
 
                 await _notificationHandlers.SendEmailAsync(email, title, content);
@@ -223,19 +223,6 @@ namespace wppBacklog.Controllers
 
         }
 
-        private UserModel CreateUser()
-        {
-            try
-            {
-                return Activator.CreateInstance<UserModel>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-                    $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
-        }
 
         [Route("/{culture}/account/confirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string culture, string code, string userId, string returnUrl)

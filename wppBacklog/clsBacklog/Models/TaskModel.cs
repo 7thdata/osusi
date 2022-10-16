@@ -253,4 +253,26 @@ namespace clsBacklog.Models
         public string? Mentions { get; set; }
         public string? Files { get; set; }
     }
+
+
+    [Table("UsersSavedSearches")]
+    public class UsersSavedSearch
+    {
+        public UsersSavedSearch(string id, string projectId, string userId)
+        {
+            Id = id;
+            ProjectId = projectId;
+            UserId = userId;
+        }
+
+        [MaxLength(64), Key]
+        public string Id { get; set; }
+        [MaxLength(64), Required]
+        public string ProjectId { get; set; }
+        [MaxLength(64), Required]
+        public string UserId { get; set; }
+        public string? Keyword { get; set; }
+        public string? TaskStatus { get; set; }
+    }
+
 }
