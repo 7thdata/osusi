@@ -1,0 +1,14 @@
+﻿@using wppBacklog.Areas.Usr.Models
+@model UsrHomeLogoutViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OrganizationId"] = Model.User?.OrganizationId;
+    ViewData["ProjectId"] = Model.User?.ProjectId;
+    ViewData["Culture"] = Model.Culture;
+    Layout = "~/Areas/Usr/Views/Shared/_Layout.cshtml";
+}
+<div class="container-fluid ps-3">
+
+    <p class="py-5 text-center">You have successfully logged out.  Back to <a href="/@Model.Culture">top page</a>.</p>
+
+</div>

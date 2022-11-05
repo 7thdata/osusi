@@ -21,4 +21,8 @@ namespace wppBacklog.Areas.Usr.Models
     {
 
     }
+    public class UsrHomeLogoutViewModel : ViewBaseModel
+    {
+
+    }
 }

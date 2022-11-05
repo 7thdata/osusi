@@ -39,6 +39,7 @@ builder.Services.AddTransient<IFileServices, FileServices>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); ;
+builder.Services.AddRazorPages();
 
 var app = builder.Build();
 

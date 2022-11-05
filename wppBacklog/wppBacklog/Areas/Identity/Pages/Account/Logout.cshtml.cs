@@ -24,9 +24,12 @@ namespace wppBacklog.Areas.Identity.Pages.Account
             _logger = logger;
         }
 
-        public async Task<IActionResult> OnPost(string returnUrl = null)
+        public async Task<IActionResult> OnPost(string culture = "en", string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
+
+            ViewData["Culture"] = culture;
+
             _logger.LogInformation("User logged out.");
             if (returnUrl != null)
             {

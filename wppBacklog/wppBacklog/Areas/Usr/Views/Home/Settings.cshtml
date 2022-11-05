@@ -54,6 +54,13 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3"></div>
+        <div class="col-md-3">
+            <form action="/@Model.Culture/logout" method="post">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-outline-secondary rounded-0">
+                    Logout
+                </button>
+            </form>
+        </div>
     </div>
 </div>
