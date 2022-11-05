@@ -13,14 +13,17 @@ namespace wppBacklog.Areas.Usr.Controllers
         private readonly UserManager<UserModel> _userManager;
         private readonly IProjectServices _projectServices;
         private readonly IOrganizationServices _organizationServices;
+        private readonly SignInManager<UserModel> _signInManager;
 
         public HomeController(UserManager<UserModel> userManager,
             IProjectServices projectServices,
-            IOrganizationServices organizationServices)
+            IOrganizationServices organizationServices,
+            SignInManager<UserModel> signInManager)
         {
             _userManager = userManager;
             _projectServices = projectServices;
             _organizationServices = organizationServices;
+            _signInManager = signInManager;
         }
 
         [Route("/{culture}/usr")]
@@ -78,6 +81,21 @@ namespace wppBacklog.Areas.Usr.Controllers
             var view = new UsrHomeSettingsViewModel()
             {
                 Title = "Settings",
+                Culture = culture
+            };
+
+            return View(view);
+        }
+
+        [HttpPost, AutoValidateAntiforgeryToken]
+        [Route("/{culture}/logout")]
+        public async Task<IActionResult> Logout(string culture)
+        {
+            await _signInManager.SignOutAsync();
+
+            var view = new UsrHomeLogoutViewModel()
+            {
+                Title = "Logout",
                 Culture = culture
             };
 
