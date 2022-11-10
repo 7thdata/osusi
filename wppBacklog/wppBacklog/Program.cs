@@ -16,8 +16,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(applicationDbConnectionString));
 
 builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
-
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -25,7 +25,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(1);
     options.LoginPath = "/Account/Login";
 });
-
 
 builder.Services.AddTransient<INotificationHandlers, NotificationHandlers>();
 builder.Services.AddTransient<IBlobHandlers, BlobHandlers>();
@@ -35,7 +34,6 @@ builder.Services.AddTransient<IProjectServices, ProjectServices>();
 builder.Services.AddTransient<ITaskServices, TaskServices>();
 builder.Services.AddTransient<IWikiServices, WikiServices>();
 builder.Services.AddTransient<IFileServices, FileServices>();
-
 
 // Add services to the container.
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); ;

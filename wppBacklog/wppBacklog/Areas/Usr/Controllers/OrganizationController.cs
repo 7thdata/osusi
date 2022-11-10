@@ -19,7 +19,6 @@ namespace wppBacklog.Areas.Usr.Controllers
         private readonly IOrganizationServices _organizationService;
         private readonly Random _random = new Random();
         private readonly IUserStore<UserModel> _userStore;
-        private readonly IUserEmailStore<UserModel> _emailStore; 
         private readonly IOptions<AppConfigModel> _config;
         private readonly INotificationHandlers _notificationHandlers;
 
@@ -31,19 +30,11 @@ namespace wppBacklog.Areas.Usr.Controllers
         {
             _userManager = userManager;
             _organizationService = organizationService;
-            _emailStore = GetEmailStore();
             _userStore = userStore;
             _config = config;
             _notificationHandlers = notificationHandlers;
         }
-        private IUserEmailStore<UserModel> GetEmailStore()
-        {
-            if (!_userManager.SupportsUserEmail)
-            {
-                throw new NotSupportedException("The default UI requires a user store with email support.");
-            }
-            return (IUserEmailStore<UserModel>)_userStore;
-        }
+      
 
         [Route("/{culture}/organizations")]
         public async Task<IActionResult> Index(string culture, string keyword, string sort, int currentPage = 1, int itemsPerPage = 50, int rcode = 0)
@@ -268,8 +259,7 @@ namespace wppBacklog.Areas.Usr.Controllers
                 };
 
                 await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
-
+            
                 user.OrganizationId = currentUser.OrganizationId;
 
                 var password = RandomPassword();
