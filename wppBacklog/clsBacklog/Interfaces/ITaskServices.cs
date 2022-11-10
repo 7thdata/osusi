@@ -316,5 +316,23 @@ namespace clsBacklog.Interfaces
         /// <param name="id"></param>
         /// <returns></returns>
         Task<TaskUpdateModel?> DeleteTaskUpdateAsync(string id);
+
+        /// <summary>
+        /// Upsert users search.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <param name="keyword"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        Task<UsersSavedSearch> SaveUsersSearchAsync(string projectId, string userId, string keyword, string status);
+
+        /// <summary>
+        /// Get users search.
+        /// </summary>
+        /// <param name="projectId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        UsersSavedSearch? GetUsersSearch(string projectId, string userId);
     }
 }

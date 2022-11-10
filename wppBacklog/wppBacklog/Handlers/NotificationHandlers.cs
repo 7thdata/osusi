@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using clsBacklog.Models;
+using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Diagnostics;
@@ -19,7 +20,7 @@ namespace wppBacklog.Handlers
         public async Task SendEmailAsync(string email, string subject, string message)
         {
             SendGridClient client = new SendGridClient(_config.Value.SendGrid.ApiKey);
-            EmailAddress from = new EmailAddress("support@7thdata.com", "BACKLOG by SEVENTH");
+            EmailAddress from = new EmailAddress("support@osushi.app", "OSUSHI.app");
             EmailAddress to = new EmailAddress(email, email);
             string plainTextContent = message;
             string htmlContent = message;
@@ -28,6 +29,5 @@ namespace wppBacklog.Handlers
 
             Debug.WriteLine(response.StatusCode.ToString());
         }
-
     }
 }

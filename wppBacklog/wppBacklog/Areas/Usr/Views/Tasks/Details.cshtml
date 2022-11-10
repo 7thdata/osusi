@@ -39,31 +39,37 @@
 
     <!--Header-->
     <div class="mb-3">
-        <div class="d-flex justify-content-between">
-            <div class="">
-                <span class="badge" style="background-color:@Model.Task.TaskType.Color; color:@Model.Task.TaskType.TextColor">
+        <div class="d-flex justify-content-between mb-1">
+            <div class="d-flex">
+                <div class="me-2 px-2" style="background-color:@Model.Task.TaskType.Color; color:@Model.Task.TaskType.TextColor; font-weight:600">
                     @Model.Task.TaskType.Name
-                </span>
-                <span>@Model.Task.Project.PermaName</span><span>-</span><span>@Model.Task.TaskNum  Url</span>
+                </div>
+                <div>
+                    @Model.Task.Project.PermaName <span>-</span><span>@Model.Task.TaskNum  Url</span>
+                </div>
             </div>
-            <div>
-                @if (Model.Task.TaskStatus != null)
-                {
-                    <span class="badge" style="background-color:@Model.Task.TaskStatus.Color; color:@Model.Task.TaskStatus.TextColor">
-                        @Model.Task.TaskStatus.Name
-                    </span>
-                }
+            <div class="d-flex">
 
                 @if (Model.Task.StartFrom > DateTime.MinValue)
                 {
-                    <span>
-                        @Model.Task.StartFrom
-                    </span>
+                    <div>
+                        @Model.Task.StartFrom?.ToString("yyyy-MM-dd")
+                    </div>
                 }
-                
+
                 @if (Model.Task.EndAt > DateTime.MinValue)
                 {
-                   <span>- </span>@Model.Task.EndAt
+                    <div> <i class="fa-regular fa-right-long"></i> </div>
+
+                    <div>
+                        @Model.Task.EndAt?.ToString("yyyy-MM-dd")
+                    </div>
+                }
+                @if (Model.Task.TaskStatus != null)
+                {
+                    <div class="ms-2 px-2" style="background-color:@Model.Task.TaskStatus.Color; color:@Model.Task.TaskStatus.TextColor; font-weight:600">
+                        @Model.Task.TaskStatus.Name
+                    </div>
                 }
 
             </div>
@@ -72,20 +78,43 @@
             <div class="font-xl">
                 @Model.Task.Name
             </div>
-            <div>
-
-                Watch, Edit, Menu
+            <div class="d-flex pt-2">
+                <div class="ps-1">
+                    <button class="btn btn-outline-secondary">
+                        <i class="fa-light fa-bookmark fa-fw"></i>
+                    </button>
+                </div>
+                <div class="ps-1">
+                    <button class="btn btn-outline-secondary">
+                        <i class="fa-light fa-pen-to-square fa-fw"></i>
+                    </button>
+                </div>
+                <div class="ps-1">
+                    <button class="btn btn-outline-secondary">
+                        <i class="fa-regular fa-ellipsis-vertical fa-fw"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!--Jumbotron-->
     <div class="card card-body">
-        <div>
-            @Model.Task.CreatedBy @Model.Task.CreatedBy @Model.Task.Created
+        <div class="d-flex">
+            <div>
+                <img src="@Model.Task.CreatedBy?.User?.ProfileImage" style="width:42px;" class="rounded" />
+            </div>
+            <div class="px-2">
+                <div class="" style="font-weight:600">
+                    @Model.Task.CreatedBy?.User?.Name
+                </div>
+                <div class="font-sm">
+                    @Model.Task.Created.ToString("yyyy-MM-dd HH:mm:ss")
+                </div>
+            </div>
         </div>
-        <div>
-            @Model.Description
+        <div class="my-3">
+            @Model.Task.Description
         </div>
         <div class="row py-3">
             <div class="col-md-6 my-2">
@@ -125,7 +154,8 @@
                             Assigned
                         </td>
                         <td>
-                            @Model.Task.AssignedPerson
+                            <img src="@Model.Task.AssignedPerson?.User?.ProfileImage" style="width:20px;" class="rounded" />
+                            @Model.Task.AssignedPerson?.User?.Name
                         </td>
                     </tr>
                     <tr>
@@ -190,18 +220,25 @@
         <div class="card card-body mt-3">
             @foreach (var log in Model.TaskLogs)
             {
-                <div class="d-flex border-bottom">
-                    <div style="width:50px;">Icon,</div>
+                <div class="d-flex border-bottom pt-3">
+                    <div style="width:50px;">
+                        <img src="@Model.Task.CreatedBy?.User?.ProfileImage" style="width:42px;" class="rounded" />
+                    </div>
                     <div class="w-100">
                         <div class="d-flex justify-content-between">
-                            <div>
-                                Person Name, @log.Created.ToString("yyyy-MM-dd HH:mm:ss")
+                            <div class="">
+                                <div class="" style="font-weight:600">
+                                    @Model.Task.CreatedBy?.User?.Name
+                                </div>
+                                <div class="font-sm">
+                                    @log.Created.ToString("yyyy-MM-dd HH:mm:ss")
+                                </div>
                             </div>
                             <div>
                                 Actions
                             </div>
                         </div>
-                        <div class="p-2">
+                        <div class="p-2 pt-4">
                             @log.Description
                         </div>
                     </div>

@@ -11,10 +11,11 @@ namespace clsBacklog.Models
     [Table("Organizations")]
     public class OrganizationModel : SqlDbBaseModel
     {
-        public OrganizationModel(string id, string name)
+        public OrganizationModel(string id, string name, string permaName)
         {
             Id = id;
             Name = name;
+            PermaName = permaName;
         }
 
         [Key, MaxLength(64)]

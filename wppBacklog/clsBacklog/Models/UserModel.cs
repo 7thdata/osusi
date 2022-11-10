@@ -19,9 +19,7 @@ public class UserModel : IdentityUser
     [MaxLength(128)]
     public string Name { get; set; }
 
- 
-
-    public string ProfileImage { get; set; }
+    public string? ProfileImage { get; set; }
 
     [MaxLength(64)]
     public string? OrganizationId { get; set; }
@@ -34,5 +32,6 @@ public class UserModel : IdentityUser
     public bool IsDeleted { get; set; }
     public DateTime Deleted { get; set; }
     public string? LastProjectId { get; set; }
+ 
 }
 
